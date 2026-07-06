@@ -57,6 +57,7 @@ export const AppointmentForm = () => {
   const [productOptions, setProductOptions] = useState({
     summerTire: false,
     winterTire: false,
+    allSeasonTire: false,
     rim: false,
     battery: false,
   });
@@ -185,7 +186,7 @@ export const AppointmentForm = () => {
       newErrors.service = "En az bir hizmet seçmelisiniz";
     }
 
-    if (wantToBuyProduct && !productOptions.summerTire && !productOptions.winterTire && !productOptions.rim && !productOptions.battery) {
+    if (wantToBuyProduct && !productOptions.summerTire && !productOptions.winterTire && !productOptions.allSeasonTire && !productOptions.rim && !productOptions.battery) {
       newErrors.productOptions = "En az bir ürün seçmelisiniz";
     }
 
@@ -194,7 +195,7 @@ export const AppointmentForm = () => {
     }
 
     // Tire size validation for product purchase
-    if (wantToBuyProduct && (productOptions.summerTire || productOptions.winterTire) && !tireSize.trim()) {
+    if (wantToBuyProduct && (productOptions.summerTire || productOptions.winterTire || productOptions.allSeasonTire) && !tireSize.trim()) {
       newErrors.tireSize = "Lastik ebatı gereklidir";
     }
 
@@ -210,7 +211,7 @@ export const AppointmentForm = () => {
 
     // Hotel plate number validation
     if (wantToChangeTire && changeTireOptions.tiresAtHotel && !hotelPlateNumber.trim()) {
-      newErrors.hotelPlateNumber = "Oteldeki lastiklerin plaka numarasını giriniz";
+      newErrors.hotelPlateNumber = "Araç plaka numarası gereklidir";
     }
 
     setErrors(newErrors);
@@ -232,6 +233,7 @@ export const AppointmentForm = () => {
         const products: string[] = [];
         if (productOptions.summerTire) products.push("Yazlık Yeni Lastik");
         if (productOptions.winterTire) products.push("Kışlık Yeni Lastik");
+        if (productOptions.allSeasonTire) products.push("Dört Mevsim Lastik");
         if (productOptions.rim) products.push("Jant");
         if (productOptions.battery) products.push("Akü");
         serviceDetails.push(`Yeni Ürün: ${products.join(", ")}`);
@@ -255,7 +257,7 @@ export const AppointmentForm = () => {
       }
 
       if (hotelPlateNumber) {
-        serviceDetails.push(`Oteldeki Lastik Plakası: ${hotelPlateNumber}`);
+        serviceDetails.push(`Araç Plaka No: ${hotelPlateNumber}`);
       }
 
       await createAppointment({
@@ -593,6 +595,7 @@ export const AppointmentForm = () => {
                     setProductOptions({
                       summerTire: false,
                       winterTire: false,
+                      allSeasonTire: false,
                       rim: false,
                       battery: false,
                     });
@@ -609,7 +612,7 @@ export const AppointmentForm = () => {
             </label>
 
             {wantToBuyProduct && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 ml-8">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3 ml-8">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
@@ -637,6 +640,20 @@ export const AppointmentForm = () => {
                     className="w-4 h-4 text-blue-600 rounded"
                   />
                   <span className="text-sm text-gray-700">Kışlık Yeni Lastik</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={productOptions.allSeasonTire}
+                    onChange={(e) =>
+                      setProductOptions({
+                        ...productOptions,
+                        allSeasonTire: e.target.checked,
+                      })
+                    }
+                    className="w-4 h-4 text-blue-600 rounded"
+                  />
+                  <span className="text-sm text-gray-700">Dört Mevsim</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -674,7 +691,7 @@ export const AppointmentForm = () => {
             )}
 
             {/* Tire Size for Product Purchase */}
-            {wantToBuyProduct && (productOptions.summerTire || productOptions.winterTire) && (
+            {wantToBuyProduct && (productOptions.summerTire || productOptions.winterTire || productOptions.allSeasonTire) && (
               <div className="mt-4 ml-8">
                 <Input
                   label="Lastik Ebatı"
@@ -771,7 +788,7 @@ export const AppointmentForm = () => {
                 {changeTireOptions.tiresAtHotel && (
                   <div className="mt-4 ml-8">
                     <Input
-                      label="Oteldeki Lastiklerin Plaka Numarası"
+                      label="Araç Plaka No"
                       type="text"
                       value={hotelPlateNumber}
                       onChange={(e) => setHotelPlateNumber(e.target.value.toUpperCase())}
