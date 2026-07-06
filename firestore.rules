@@ -1,0 +1,35 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function - Check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Appointments collection
+    match /appointments/{appointmentId} {
+      // Allow anyone to create new appointments (for public booking)
+      allow create: if true;
+      
+      // Only authenticated users can read, update, delete
+      allow read, update, delete: if isAuthenticated();
+    }
+    
+    // Settings collection
+    match /settings/{settingsId} {
+      // Anyone can read settings (needed for public booking form)
+      allow read: if true;
+      
+      // Only authenticated users can write settings
+      allow write: if isAuthenticated();
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      // Only authenticated users can access users collection
+      allow read, write: if isAuthenticated();
+    }
+  }
+}
