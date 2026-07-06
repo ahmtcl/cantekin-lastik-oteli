@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/Input";
 import { Textarea } from "@/components/Textarea";
 import { Button } from "@/components/Button";
+import Select from "@/components/Select";
+import { vehicleBrands, vehicleModels } from "@/lib/data/vehicles";
 import { useSettings } from "@/lib/hooks/useSettings";
 import { createAppointment, getBookedTimes } from "@/lib/services/appointments";
 import {
@@ -389,23 +391,24 @@ export const AppointmentForm = () => {
           Araç Bilgileri
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Input
+          <Select
             label="Marka"
-            type="text"
             value={formData.brand}
-            onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+            onChange={(e) => {
+              setFormData({ ...formData, brand: e.target.value, model: "" });
+            }}
             error={errors.brand}
-            placeholder="Örn: Toyota"
+            options={vehicleBrands}
             required
           />
-          <Input
+          <Select
             label="Model"
-            type="text"
             value={formData.model}
             onChange={(e) => setFormData({ ...formData, model: e.target.value })}
             error={errors.model}
-            placeholder="Örn: Corolla"
+            options={formData.brand ? vehicleModels[formData.brand] || [] : []}
             required
+            disabled={!formData.brand}
           />
           <Input
             label="Plaka"
