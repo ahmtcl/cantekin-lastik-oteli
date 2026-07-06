@@ -429,54 +429,63 @@ export const AppointmentForm = () => {
         <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b-2 border-blue-600">
           Randevu Bilgileri
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <Input
-            label="Randevu Tarihi"
-            type="date"
-            value={formData.appointmentDate}
-            onChange={(e) => handleDateChange(e.target.value)}
-            error={errors.appointmentDate || dateError}
-            min={minDate}
-            required
-          />
-        </div>
-
-        {formData.appointmentDate && !dateError && availableTimes.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Tarih Seçimi */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
+            <Input
+              label="Randevu Tarihi"
+              type="date"
+              value={formData.appointmentDate}
+              onChange={(e) => handleDateChange(e.target.value)}
+              error={errors.appointmentDate || dateError}
+              min={minDate}
+              required
+            />
+          </div>
+
+          {/* Saat Seçimi */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Randevu Saati
+              <span className="text-red-500 ml-1">*</span>
             </label>
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
-              {availableTimes.map((time) => (
-                <button
-                  key={time}
-                  type="button"
-                  onClick={() =>
-                    setFormData({ ...formData, appointmentTime: time })
-                  }
-                  className={`py-3 px-4 rounded-xl border-2 transition-all duration-300 font-medium ${
-                    formData.appointmentTime === time
-                      ? "border-blue-600 bg-blue-50 text-blue-600 shadow-lg"
-                      : "border-gray-300 text-gray-700 hover:border-blue-400 hover:text-blue-600"
-                  }`}
-                >
-                  {time}
-                </button>
-              ))}
-            </div>
+            {formData.appointmentDate && !dateError && availableTimes.length > 0 ? (
+              <select
+                value={formData.appointmentTime}
+                onChange={(e) =>
+                  setFormData({ ...formData, appointmentTime: e.target.value })
+                }
+                className={`w-full px-4 py-3 rounded-xl border ${
+                  errors.appointmentTime
+                    ? "border-red-500 focus:border-red-500 focus:ring-red-500/20"
+                    : "border-gray-300 focus:border-blue-500 focus:ring-blue-500/20"
+                } focus:ring-4 focus:outline-none transition-all bg-white text-gray-900`}
+              >
+                <option value="">Saat seçiniz...</option>
+                {availableTimes.map((time) => (
+                  <option key={time} value={time}>
+                    {time}
+                  </option>
+                ))}
+              </select>
+            ) : formData.appointmentDate && !dateError && availableTimes.length === 0 ? (
+              <div className="px-4 py-3 bg-red-50 border border-red-200 rounded-xl">
+                <p className="text-sm text-red-600">
+                  Bu tarihte müsait saat yok
+                </p>
+              </div>
+            ) : (
+              <div className="px-4 py-3 bg-gray-100 border border-gray-300 rounded-xl">
+                <p className="text-sm text-gray-500">
+                  Önce tarih seçiniz
+                </p>
+              </div>
+            )}
             {errors.appointmentTime && (
               <p className="mt-2 text-sm text-red-600">{errors.appointmentTime}</p>
             )}
           </div>
-        )}
-
-        {formData.appointmentDate && !dateError && availableTimes.length === 0 && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
-            <p className="text-sm text-red-600">
-              Seçtiğiniz tarihte müsait saat bulunmamaktadır.
-            </p>
-          </div>
-        )}
+        </div>
       </div>
 
       {/* Not */}
