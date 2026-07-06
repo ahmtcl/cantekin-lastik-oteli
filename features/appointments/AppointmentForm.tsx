@@ -67,6 +67,7 @@ export const AppointmentForm = () => {
   });
   const [tireSize, setTireSize] = useState("");
   const [tireSeason, setTireSeason] = useState<TireSeasonType>("");
+  const [hotelPlateNumber, setHotelPlateNumber] = useState("");
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
@@ -207,6 +208,11 @@ export const AppointmentForm = () => {
       }
     }
 
+    // Hotel plate number validation
+    if (wantToChangeTire && changeTireOptions.tiresAtHotel && !hotelPlateNumber.trim()) {
+      newErrors.hotelPlateNumber = "Oteldeki lastiklerin plaka numarasını giriniz";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -246,6 +252,10 @@ export const AppointmentForm = () => {
       
       if (tireSize) {
         serviceDetails.push(`Lastik Ebatı: ${tireSize}`);
+      }
+
+      if (hotelPlateNumber) {
+        serviceDetails.push(`Oteldeki Lastik Plakası: ${hotelPlateNumber}`);
       }
 
       await createAppointment({
@@ -694,6 +704,7 @@ export const AppointmentForm = () => {
                       tiresAtHotel: false,
                     });
                     setTireSeason("");
+                    setHotelPlateNumber("");
                     if (!wantToBuyProduct) {
                       setTireSize("");
                     }
@@ -741,17 +752,35 @@ export const AppointmentForm = () => {
                     <input
                       type="checkbox"
                       checked={changeTireOptions.tiresAtHotel}
-                      onChange={(e) =>
+                      onChange={(e) => {
                         setChangeTireOptions({
                           ...changeTireOptions,
                           tiresAtHotel: e.target.checked,
-                        })
-                      }
+                        });
+                        if (!e.target.checked) {
+                          setHotelPlateNumber("");
+                        }
+                      }}
                       className="w-4 h-4 text-blue-600 rounded"
                     />
                     <span className="text-sm text-gray-700">Lastikler Otelinizde</span>
                   </label>
                 </div>
+
+                {/* Hotel Plate Number for Tires at Hotel */}
+                {changeTireOptions.tiresAtHotel && (
+                  <div className="mt-4 ml-8">
+                    <Input
+                      label="Oteldeki Lastiklerin Plaka Numarası"
+                      type="text"
+                      value={hotelPlateNumber}
+                      onChange={(e) => setHotelPlateNumber(e.target.value.toUpperCase())}
+                      error={errors.hotelPlateNumber}
+                      placeholder="34ABC123"
+                      required
+                    />
+                  </div>
+                )}
 
                 {/* Tire Season and Size for New Tire */}
                 {changeTireOptions.newTire && (
