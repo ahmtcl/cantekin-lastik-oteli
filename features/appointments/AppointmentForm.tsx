@@ -24,6 +24,7 @@ import { Loading } from "@/components/Loading";
 
 type RegistrationType = "bireysel" | "kurumsal" | "rentacar" | "";
 type VehicleType = "otomobil" | "4x4" | "";
+type TireSeasonType = "yazlik" | "kislik" | "dort-mevsim" | "";
 
 export const AppointmentForm = () => {
   const router = useRouter();
@@ -49,6 +50,23 @@ export const AppointmentForm = () => {
     appointmentTime: "",
     note: "",
   });
+
+  // Service selection data
+  const [wantToBuyProduct, setWantToBuyProduct] = useState(false);
+  const [wantToChangeTire, setWantToChangeTire] = useState(false);
+  const [productOptions, setProductOptions] = useState({
+    summerTire: false,
+    winterTire: false,
+    rim: false,
+    battery: false,
+  });
+  const [changeTireOptions, setChangeTireOptions] = useState({
+    newTire: false,
+    tiresWithMe: false,
+    tiresAtHotel: false,
+  });
+  const [tireSize, setTireSize] = useState("");
+  const [tireSeason, setTireSeason] = useState<TireSeasonType>("");
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
@@ -161,6 +179,34 @@ export const AppointmentForm = () => {
       newErrors.appointmentTime = "Randevu saati gereklidir";
     }
 
+    // Service selection validation
+    if (!wantToBuyProduct && !wantToChangeTire) {
+      newErrors.service = "En az bir hizmet seçmelisiniz";
+    }
+
+    if (wantToBuyProduct && !productOptions.summerTire && !productOptions.winterTire && !productOptions.rim && !productOptions.battery) {
+      newErrors.productOptions = "En az bir ürün seçmelisiniz";
+    }
+
+    if (wantToChangeTire && !changeTireOptions.newTire && !changeTireOptions.tiresWithMe && !changeTireOptions.tiresAtHotel) {
+      newErrors.changeTireOptions = "Lastik değiştirme seçeneği seçmelisiniz";
+    }
+
+    // Tire size validation for product purchase
+    if (wantToBuyProduct && (productOptions.summerTire || productOptions.winterTire) && !tireSize.trim()) {
+      newErrors.tireSize = "Lastik ebatı gereklidir";
+    }
+
+    // Tire type and size validation for tire change
+    if (wantToChangeTire && changeTireOptions.newTire) {
+      if (!tireSeason) {
+        newErrors.tireSeason = "Lastik mevsimi seçmelisiniz";
+      }
+      if (!tireSize.trim()) {
+        newErrors.tireSize = "Lastik ebatı gereklidir";
+      }
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -173,13 +219,42 @@ export const AppointmentForm = () => {
     setLoading(true);
 
     try {
+      // Build service details
+      const serviceDetails: string[] = [];
+      
+      if (wantToBuyProduct) {
+        const products: string[] = [];
+        if (productOptions.summerTire) products.push("Yazlık Yeni Lastik");
+        if (productOptions.winterTire) products.push("Kışlık Yeni Lastik");
+        if (productOptions.rim) products.push("Jant");
+        if (productOptions.battery) products.push("Akü");
+        serviceDetails.push(`Yeni Ürün: ${products.join(", ")}`);
+      }
+      
+      if (wantToChangeTire) {
+        const changeOptions: string[] = [];
+        if (changeTireOptions.newTire) changeOptions.push("Yeni Lastik");
+        if (changeTireOptions.tiresWithMe) changeOptions.push("Lastikler Kendimde");
+        if (changeTireOptions.tiresAtHotel) changeOptions.push("Lastikler Otelinizde");
+        serviceDetails.push(`Lastik Değiştirme: ${changeOptions.join(", ")}`);
+      }
+      
+      if (tireSeason) {
+        const seasonMap = { yazlik: "Yazlık", kislik: "Kışlık", "dort-mevsim": "Dört Mevsim" };
+        serviceDetails.push(`Mevsim: ${seasonMap[tireSeason]}`);
+      }
+      
+      if (tireSize) {
+        serviceDetails.push(`Lastik Ebatı: ${tireSize}`);
+      }
+
       await createAppointment({
         name: formData.name.trim(),
         phone: formatPhone(formData.phone),
         plate: formatPlate(formData.plate),
         appointmentDate: formData.appointmentDate,
         appointmentTime: formData.appointmentTime,
-        note: `${registrationType.toUpperCase()} | ${vehicleType.toUpperCase()} | ${formData.companyName ? `Firma: ${formData.companyName} | ` : ""}Email: ${formData.email} | Marka: ${formData.brand} | Model: ${formData.model}${formData.note ? ` | Not: ${formData.note}` : ""}`,
+        note: `${registrationType.toUpperCase()} | ${vehicleType.toUpperCase()} | ${formData.companyName ? `Firma: ${formData.companyName} | ` : ""}Email: ${formData.email} | Marka: ${formData.brand} | Model: ${formData.model} | ${serviceDetails.join(" | ")}${formData.note ? ` | Not: ${formData.note}` : ""}`,
       });
 
       router.push("/tesekkur");
@@ -485,6 +560,269 @@ export const AppointmentForm = () => {
               <p className="mt-2 text-sm text-red-600">{errors.appointmentTime}</p>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* İstenilen Hizmet */}
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b-2 border-blue-600">
+          İstenilen Hizmet
+        </h3>
+        
+        {/* Main Service Categories */}
+        <div className="space-y-6">
+          {/* Yeni Ürün Almak İstiyorum */}
+          <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+            <label className="flex items-start gap-3 cursor-pointer group mb-4">
+              <input
+                type="checkbox"
+                checked={wantToBuyProduct}
+                onChange={(e) => {
+                  setWantToBuyProduct(e.target.checked);
+                  if (!e.target.checked) {
+                    setProductOptions({
+                      summerTire: false,
+                      winterTire: false,
+                      rim: false,
+                      battery: false,
+                    });
+                    if (!wantToChangeTire) {
+                      setTireSize("");
+                    }
+                  }
+                }}
+                className="w-5 h-5 mt-0.5 text-blue-600 rounded"
+              />
+              <span className="font-semibold text-gray-900 group-hover:text-blue-600">
+                Yeni Ürün Almak İstiyorum
+              </span>
+            </label>
+
+            {wantToBuyProduct && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 ml-8">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={productOptions.summerTire}
+                    onChange={(e) =>
+                      setProductOptions({
+                        ...productOptions,
+                        summerTire: e.target.checked,
+                      })
+                    }
+                    className="w-4 h-4 text-blue-600 rounded"
+                  />
+                  <span className="text-sm text-gray-700">Yazlık Yeni Lastik</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={productOptions.winterTire}
+                    onChange={(e) =>
+                      setProductOptions({
+                        ...productOptions,
+                        winterTire: e.target.checked,
+                      })
+                    }
+                    className="w-4 h-4 text-blue-600 rounded"
+                  />
+                  <span className="text-sm text-gray-700">Kışlık Yeni Lastik</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={productOptions.rim}
+                    onChange={(e) =>
+                      setProductOptions({
+                        ...productOptions,
+                        rim: e.target.checked,
+                      })
+                    }
+                    className="w-4 h-4 text-blue-600 rounded"
+                  />
+                  <span className="text-sm text-gray-700">Jant</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={productOptions.battery}
+                    onChange={(e) =>
+                      setProductOptions({
+                        ...productOptions,
+                        battery: e.target.checked,
+                      })
+                    }
+                    className="w-4 h-4 text-blue-600 rounded"
+                  />
+                  <span className="text-sm text-gray-700">Akü</span>
+                </label>
+              </div>
+            )}
+
+            {errors.productOptions && (
+              <p className="mt-2 ml-8 text-sm text-red-600">{errors.productOptions}</p>
+            )}
+
+            {/* Tire Size for Product Purchase */}
+            {wantToBuyProduct && (productOptions.summerTire || productOptions.winterTire) && (
+              <div className="mt-4 ml-8">
+                <Input
+                  label="Lastik Ebatı"
+                  type="text"
+                  value={tireSize}
+                  onChange={(e) => setTireSize(e.target.value)}
+                  error={errors.tireSize}
+                  placeholder="Örn: 205/55 R16"
+                  required
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Lastik Değiştirmek İstiyorum */}
+          <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+            <label className="flex items-start gap-3 cursor-pointer group mb-4">
+              <input
+                type="checkbox"
+                checked={wantToChangeTire}
+                onChange={(e) => {
+                  setWantToChangeTire(e.target.checked);
+                  if (!e.target.checked) {
+                    setChangeTireOptions({
+                      newTire: false,
+                      tiresWithMe: false,
+                      tiresAtHotel: false,
+                    });
+                    setTireSeason("");
+                    if (!wantToBuyProduct) {
+                      setTireSize("");
+                    }
+                  }
+                }}
+                className="w-5 h-5 mt-0.5 text-blue-600 rounded"
+              />
+              <span className="font-semibold text-gray-900 group-hover:text-blue-600">
+                Lastik Değiştirmek İstiyorum
+              </span>
+            </label>
+
+            {wantToChangeTire && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 ml-8">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={changeTireOptions.newTire}
+                      onChange={(e) =>
+                        setChangeTireOptions({
+                          ...changeTireOptions,
+                          newTire: e.target.checked,
+                        })
+                      }
+                      className="w-4 h-4 text-blue-600 rounded"
+                    />
+                    <span className="text-sm text-gray-700">Yeni Lastik</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={changeTireOptions.tiresWithMe}
+                      onChange={(e) =>
+                        setChangeTireOptions({
+                          ...changeTireOptions,
+                          tiresWithMe: e.target.checked,
+                        })
+                      }
+                      className="w-4 h-4 text-blue-600 rounded"
+                    />
+                    <span className="text-sm text-gray-700">Lastikler Kendimde</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={changeTireOptions.tiresAtHotel}
+                      onChange={(e) =>
+                        setChangeTireOptions({
+                          ...changeTireOptions,
+                          tiresAtHotel: e.target.checked,
+                        })
+                      }
+                      className="w-4 h-4 text-blue-600 rounded"
+                    />
+                    <span className="text-sm text-gray-700">Lastikler Otelinizde</span>
+                  </label>
+                </div>
+
+                {/* Tire Season and Size for New Tire */}
+                {changeTireOptions.newTire && (
+                  <div className="mt-4 ml-8 space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Lastik Mevsimi
+                        <span className="text-red-500 ml-1">*</span>
+                      </label>
+                      <div className="flex gap-4">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="tireSeason"
+                            value="yazlik"
+                            checked={tireSeason === "yazlik"}
+                            onChange={(e) => setTireSeason(e.target.value as TireSeasonType)}
+                            className="w-4 h-4 text-blue-600"
+                          />
+                          <span className="text-sm text-gray-700">Yazlık</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="tireSeason"
+                            value="kislik"
+                            checked={tireSeason === "kislik"}
+                            onChange={(e) => setTireSeason(e.target.value as TireSeasonType)}
+                            className="w-4 h-4 text-blue-600"
+                          />
+                          <span className="text-sm text-gray-700">Kışlık</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="tireSeason"
+                            value="dort-mevsim"
+                            checked={tireSeason === "dort-mevsim"}
+                            onChange={(e) => setTireSeason(e.target.value as TireSeasonType)}
+                            className="w-4 h-4 text-blue-600"
+                          />
+                          <span className="text-sm text-gray-700">Dört Mevsim</span>
+                        </label>
+                      </div>
+                      {errors.tireSeason && (
+                        <p className="mt-2 text-sm text-red-600">{errors.tireSeason}</p>
+                      )}
+                    </div>
+
+                    <Input
+                      label="Lastik Ebatı"
+                      type="text"
+                      value={tireSize}
+                      onChange={(e) => setTireSize(e.target.value)}
+                      error={errors.tireSize}
+                      placeholder="Örn: 205/55 R16"
+                      required
+                    />
+                  </div>
+                )}
+              </>
+            )}
+
+            {errors.changeTireOptions && (
+              <p className="mt-2 ml-8 text-sm text-red-600">{errors.changeTireOptions}</p>
+            )}
+          </div>
+
+          {errors.service && (
+            <p className="text-sm text-red-600">{errors.service}</p>
+          )}
         </div>
       </div>
 
