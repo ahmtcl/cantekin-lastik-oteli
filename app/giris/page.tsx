@@ -7,6 +7,7 @@ import { auth } from "@/lib/firebase/config";
 import { Input } from "@/components/Input";
 import { Button } from "@/components/Button";
 import { Container } from "@/components/Container";
+import Link from "next/link";
 
 export default function GirisPage() {
   const router = useRouter();
@@ -33,21 +34,37 @@ export default function GirisPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
       <Container>
         <div className="max-w-md mx-auto">
-          <div className="bg-white rounded-lg shadow-md p-8">
-            <h1 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-              Personel Girişi
-            </h1>
+          {/* Back button */}
+          <Link href="/" className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors mb-6 font-medium">
+            <span>←</span>
+            <span>Ana Sayfa</span>
+          </Link>
+          
+          {/* Login card */}
+          <div className="bg-white rounded-2xl p-8 shadow-xl border border-gray-200">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <span className="text-2xl">🔐</span>
+              </div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                Personel Girişi
+              </h1>
+              <p className="text-gray-600">
+                Yönetim paneline erişim için giriş yapın
+              </p>
+            </div>
 
             {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
                 <p className="text-sm text-red-600">{error}</p>
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-5">
               <Input
                 label="E-posta"
                 type="email"
@@ -74,6 +91,13 @@ export default function GirisPage() {
                 Giriş Yap
               </Button>
             </form>
+            
+            {/* Footer */}
+            <div className="mt-6 text-center text-sm text-gray-600">
+              Giriş yapmakta sorun mu yaşıyorsunuz?
+              <br />
+              <span className="text-gray-500">Yönetici ile iletişime geçin</span>
+            </div>
           </div>
         </div>
       </Container>

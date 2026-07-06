@@ -20,13 +20,28 @@ import {
 } from "@/lib/utils/date";
 import { Loading } from "@/components/Loading";
 
+type RegistrationType = "bireysel" | "kurumsal" | "rentacar" | "";
+type VehicleType = "otomobil" | "4x4" | "";
+
 export const AppointmentForm = () => {
   const router = useRouter();
   const { settings, loading: settingsLoading } = useSettings();
+  const [step, setStep] = useState(1);
 
+  // Step 1 data
+  const [registrationType, setRegistrationType] = useState<RegistrationType>("");
+  const [vehicleType, setVehicleType] = useState<VehicleType>("");
+  const [kvkkAccepted, setKvkkAccepted] = useState(false);
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
+
+  // Step 2 data
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
+    email: "",
+    companyName: "",
+    brand: "",
+    model: "",
     plate: "",
     appointmentDate: "",
     appointmentTime: "",
@@ -37,6 +52,28 @@ export const AppointmentForm = () => {
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [dateError, setDateError] = useState("");
+
+  const handleStep1Continue = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!registrationType) {
+      newErrors.registrationType = "Lütfen kayıt türü seçiniz";
+    }
+    if (!vehicleType) {
+      newErrors.vehicleType = "Lütfen araç türü seçiniz";
+    }
+    if (!kvkkAccepted) {
+      newErrors.kvkk = "KVKK metnini okumanız gerekmektedir";
+    }
+    if (!privacyAccepted) {
+      newErrors.privacy = "Çerez politikasını kabul etmeniz gerekmektedir";
+    }
+
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length === 0) {
+      setStep(2);
+    }
+  };
 
   const handleDateChange = async (date: string) => {
     setFormData({ ...formData, appointmentDate: date, appointmentTime: "" });
@@ -90,6 +127,24 @@ export const AppointmentForm = () => {
       newErrors.phone = "Geçerli bir telefon numarası giriniz (05XXXXXXXXX)";
     }
 
+    if (!formData.email.trim()) {
+      newErrors.email = "E-posta gereklidir";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = "Geçerli bir e-posta adresi giriniz";
+    }
+
+    if (registrationType === "kurumsal" && !formData.companyName.trim()) {
+      newErrors.companyName = "Firma adı gereklidir";
+    }
+
+    if (!formData.brand.trim()) {
+      newErrors.brand = "Marka gereklidir";
+    }
+
+    if (!formData.model.trim()) {
+      newErrors.model = "Model gereklidir";
+    }
+
     if (!formData.plate.trim()) {
       newErrors.plate = "Plaka gereklidir";
     } else if (!validatePlate(formData.plate)) {
@@ -122,7 +177,7 @@ export const AppointmentForm = () => {
         plate: formatPlate(formData.plate),
         appointmentDate: formData.appointmentDate,
         appointmentTime: formData.appointmentTime,
-        note: formData.note.trim(),
+        note: `${registrationType.toUpperCase()} | ${vehicleType.toUpperCase()} | ${formData.companyName ? `Firma: ${formData.companyName} | ` : ""}Email: ${formData.email} | Marka: ${formData.brand} | Model: ${formData.model}${formData.note ? ` | Not: ${formData.note}` : ""}`,
       });
 
       router.push("/tesekkur");
@@ -139,98 +194,312 @@ export const AppointmentForm = () => {
 
   const minDate = new Date().toISOString().split("T")[0];
 
+  // STEP 1: Registration and Vehicle Type Selection
+  if (step === 1) {
+    return (
+      <div className="space-y-8">
+        {/* Kayıt Türü */}
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b-2 border-blue-600">
+            Kayıt Türü
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              { value: "bireysel", label: "Bireysel" },
+              { value: "kurumsal", label: "Kurumsal" },
+              { value: "rentacar", label: "Rent A Car" },
+            ].map((type) => (
+              <label
+                key={type.value}
+                className={`flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all ${
+                  registrationType === type.value
+                    ? "border-blue-600 bg-blue-50"
+                    : "border-gray-300 hover:border-blue-400"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="registrationType"
+                  value={type.value}
+                  checked={registrationType === type.value}
+                  onChange={(e) => setRegistrationType(e.target.value as RegistrationType)}
+                  className="w-5 h-5 text-blue-600"
+                />
+                <span className="font-medium text-gray-700">{type.label}</span>
+              </label>
+            ))}
+          </div>
+          {errors.registrationType && (
+            <p className="mt-2 text-sm text-red-600">{errors.registrationType}</p>
+          )}
+        </div>
+
+        {/* Araç Türü */}
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b-2 border-blue-600">
+            Araç Türü
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[
+              { value: "otomobil", label: "Otomobil" },
+              { value: "4x4", label: "4x4" },
+            ].map((type) => (
+              <label
+                key={type.value}
+                className={`flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all ${
+                  vehicleType === type.value
+                    ? "border-blue-600 bg-blue-50"
+                    : "border-gray-300 hover:border-blue-400"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="vehicleType"
+                  value={type.value}
+                  checked={vehicleType === type.value}
+                  onChange={(e) => setVehicleType(e.target.value as VehicleType)}
+                  className="w-5 h-5 text-blue-600"
+                />
+                <span className="font-medium text-gray-700">{type.label}</span>
+              </label>
+            ))}
+          </div>
+          {errors.vehicleType && (
+            <p className="mt-2 text-sm text-red-600">{errors.vehicleType}</p>
+          )}
+        </div>
+
+        {/* Checkboxes */}
+        <div className="space-y-4 pt-4 border-t">
+          <label className="flex items-start gap-3 cursor-pointer group">
+            <input
+              type="checkbox"
+              checked={kvkkAccepted}
+              onChange={(e) => setKvkkAccepted(e.target.checked)}
+              className="w-5 h-5 mt-0.5 text-blue-600 rounded"
+            />
+            <span className="text-gray-700 group-hover:text-gray-900">
+              <strong>KVKK Metnini</strong> Okudum
+            </span>
+          </label>
+          {errors.kvkk && <p className="text-sm text-red-600">{errors.kvkk}</p>}
+
+          <label className="flex items-start gap-3 cursor-pointer group">
+            <input
+              type="checkbox"
+              checked={privacyAccepted}
+              onChange={(e) => setPrivacyAccepted(e.target.checked)}
+              className="w-5 h-5 mt-0.5 text-blue-600 rounded"
+            />
+            <span className="text-gray-700 group-hover:text-gray-900">
+              <strong>Çerez Politikası</strong> Okudum
+            </span>
+          </label>
+          {errors.privacy && <p className="text-sm text-red-600">{errors.privacy}</p>}
+        </div>
+
+        {/* Continue Button */}
+        <div className="flex gap-4 pt-6">
+          <button
+            onClick={() => router.push("/")}
+            className="px-8 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-xl transition-all"
+          >
+            Geri
+          </button>
+          <button
+            onClick={handleStep1Continue}
+            className="flex-1 px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg transition-all duration-300 hover:scale-[1.02]"
+          >
+            Devam
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // STEP 2: Form Details (Horizontal Layout)
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl mx-auto">
-      <Input
-        label="Ad Soyad"
-        type="text"
-        value={formData.name}
-        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-        error={errors.name}
-        placeholder="Adınız ve soyadınız"
-        required
-      />
+    <form onSubmit={handleSubmit} className="space-y-8">
+      {/* Progress indicator */}
+      <div className="flex items-center gap-2 pb-4 border-b">
+        <button
+          type="button"
+          onClick={() => setStep(1)}
+          className="text-blue-600 hover:text-blue-700 font-medium"
+        >
+          ← Geri
+        </button>
+        <span className="text-gray-400">|</span>
+        <span className="text-gray-600">Adım 2/2</span>
+      </div>
 
-      <Input
-        label="Telefon"
-        type="tel"
-        value={formData.phone}
-        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-        error={errors.phone}
-        placeholder="05XXXXXXXXX"
-        required
-      />
-
-      <Input
-        label="Plaka"
-        type="text"
-        value={formData.plate}
-        onChange={(e) =>
-          setFormData({ ...formData, plate: e.target.value.toUpperCase() })
-        }
-        error={errors.plate}
-        placeholder="34ABC123"
-        required
-      />
-
+      {/* Kişisel Bilgiler */}
       <div>
-        <Input
-          label="Randevu Tarihi"
-          type="date"
-          value={formData.appointmentDate}
-          onChange={(e) => handleDateChange(e.target.value)}
-          error={errors.appointmentDate || dateError}
-          min={minDate}
-          required
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b-2 border-blue-600">
+          Kişisel Bilgiler
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Input
+            label="Ad Soyad"
+            type="text"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            error={errors.name}
+            placeholder="Adınız ve soyadınız"
+            required
+          />
+          <Input
+            label="Telefon"
+            type="tel"
+            value={formData.phone}
+            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+            error={errors.phone}
+            placeholder="05XXXXXXXXX"
+            required
+          />
+          <Input
+            label="E-posta"
+            type="email"
+            value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            error={errors.email}
+            placeholder="ornek@email.com"
+            required
+          />
+        </div>
+        
+        {registrationType === "kurumsal" && (
+          <div className="mt-4">
+            <Input
+              label="Firma Adı"
+              type="text"
+              value={formData.companyName}
+              onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
+              error={errors.companyName}
+              placeholder="Firma adınız"
+              required
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Araç Bilgileri */}
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b-2 border-blue-600">
+          Araç Bilgileri
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Input
+            label="Marka"
+            type="text"
+            value={formData.brand}
+            onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+            error={errors.brand}
+            placeholder="Örn: Toyota"
+            required
+          />
+          <Input
+            label="Model"
+            type="text"
+            value={formData.model}
+            onChange={(e) => setFormData({ ...formData, model: e.target.value })}
+            error={errors.model}
+            placeholder="Örn: Corolla"
+            required
+          />
+          <Input
+            label="Plaka"
+            type="text"
+            value={formData.plate}
+            onChange={(e) =>
+              setFormData({ ...formData, plate: e.target.value.toUpperCase() })
+            }
+            error={errors.plate}
+            placeholder="34ABC123"
+            required
+          />
+        </div>
+      </div>
+
+      {/* Randevu Bilgileri */}
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b-2 border-blue-600">
+          Randevu Bilgileri
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <Input
+            label="Randevu Tarihi"
+            type="date"
+            value={formData.appointmentDate}
+            onChange={(e) => handleDateChange(e.target.value)}
+            error={errors.appointmentDate || dateError}
+            min={minDate}
+            required
+          />
+        </div>
+
+        {formData.appointmentDate && !dateError && availableTimes.length > 0 && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Randevu Saati
+            </label>
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+              {availableTimes.map((time) => (
+                <button
+                  key={time}
+                  type="button"
+                  onClick={() =>
+                    setFormData({ ...formData, appointmentTime: time })
+                  }
+                  className={`py-3 px-4 rounded-xl border-2 transition-all duration-300 font-medium ${
+                    formData.appointmentTime === time
+                      ? "border-blue-600 bg-blue-50 text-blue-600 shadow-lg"
+                      : "border-gray-300 text-gray-700 hover:border-blue-400 hover:text-blue-600"
+                  }`}
+                >
+                  {time}
+                </button>
+              ))}
+            </div>
+            {errors.appointmentTime && (
+              <p className="mt-2 text-sm text-red-600">{errors.appointmentTime}</p>
+            )}
+          </div>
+        )}
+
+        {formData.appointmentDate && !dateError && availableTimes.length === 0 && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
+            <p className="text-sm text-red-600">
+              Seçtiğiniz tarihte müsait saat bulunmamaktadır.
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Not */}
+      <div>
+        <Textarea
+          label="Not (İsteğe Bağlı)"
+          value={formData.note}
+          onChange={(e) => setFormData({ ...formData, note: e.target.value })}
+          placeholder="Varsa eklemek istediğiniz notlar..."
+          rows={4}
         />
       </div>
 
-      {formData.appointmentDate && !dateError && availableTimes.length > 0 && (
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Randevu Saati
-          </label>
-          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-            {availableTimes.map((time) => (
-              <button
-                key={time}
-                type="button"
-                onClick={() =>
-                  setFormData({ ...formData, appointmentTime: time })
-                }
-                className={`py-2 px-4 rounded-lg border-2 transition-colors ${
-                  formData.appointmentTime === time
-                    ? "border-blue-600 bg-blue-50 text-blue-600"
-                    : "border-gray-300 hover:border-blue-300"
-                }`}
-              >
-                {time}
-              </button>
-            ))}
-          </div>
-          {errors.appointmentTime && (
-            <p className="mt-1 text-sm text-red-600">{errors.appointmentTime}</p>
-          )}
-        </div>
-      )}
-
-      {formData.appointmentDate && !dateError && availableTimes.length === 0 && (
-        <p className="text-sm text-red-600">
-          Seçtiğiniz tarihte müsait saat bulunmamaktadır.
-        </p>
-      )}
-
-      <Textarea
-        label="Not (İsteğe Bağlı)"
-        value={formData.note}
-        onChange={(e) => setFormData({ ...formData, note: e.target.value })}
-        placeholder="Varsa eklemek istediğiniz notlar..."
-        rows={4}
-      />
-
-      <Button type="submit" fullWidth loading={loading}>
-        Randevu Oluştur
-      </Button>
+      {/* Submit Button */}
+      <div className="flex gap-4 pt-6">
+        <button
+          type="button"
+          onClick={() => setStep(1)}
+          className="px-8 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-xl transition-all"
+        >
+          Geri
+        </button>
+        <Button type="submit" fullWidth loading={loading}>
+          Randevu Oluştur
+        </Button>
+      </div>
     </form>
   );
 };

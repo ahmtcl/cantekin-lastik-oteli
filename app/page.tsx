@@ -1,24 +1,48 @@
 import Link from "next/link";
 import { Container } from "@/components/Container";
-import { Button } from "@/components/Button";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center">
-      <Container>
-        <div className="max-w-2xl mx-auto text-center py-16">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Can Tekin Lastik Oteli Randevu Sistemi
-          </h1>
-          <p className="text-lg text-gray-600 mb-8">
-            Lastik değişimi için uygun gün ve saati seçerek kolayca randevunuzu
-            oluşturabilirsiniz.
-          </p>
-          <Link href="/randevu">
-            <Button>Randevu Oluştur</Button>
-          </Link>
-        </div>
-      </Container>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+      <div className="flex items-center justify-center min-h-screen">
+        <Container>
+          <div className="max-w-4xl mx-auto text-center py-16">
+            {/* Logo/Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-100 border border-green-200 mb-8">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+              <span className="text-sm text-green-700 font-medium">Online Randevu Sistemi</span>
+            </div>
+            
+            {/* Main heading */}
+            <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent leading-tight">
+              Can Tekin Oto Lastik
+            </h1>
+            <p className="text-xl md:text-2xl text-gray-700 mb-4 font-semibold">
+              Profesyonel Lastik Oteli Hizmeti
+            </p>
+            
+            {/* Description */}
+            <p className="text-lg text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed">
+              Lastik değişimi, balans ve rot ayarı için hızlı ve kolay randevu oluşturun.
+              Zamanınızı verimli kullanın, beklemeyin.
+            </p>
+            
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Link href="/randevu">
+                <button className="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                  Randevu Oluştur
+                </button>
+              </Link>
+              <Link href="/giris">
+                <button className="px-8 py-4 bg-white hover:bg-gray-50 text-gray-700 font-semibold rounded-xl border-2 border-gray-200 transition-all duration-300 hover:scale-105 hover:border-gray-300">
+                  Personel Girişi
+                </button>
+              </Link>
+            </div>
+          </div>
+        </Container>
+      </div>
     </div>
   );
 }

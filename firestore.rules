@@ -22,8 +22,9 @@ service cloud.firestore {
       // Anyone can read settings (needed for public booking form)
       allow read: if true;
       
-      // Only authenticated users can write settings
-      allow write: if isAuthenticated();
+      // Allow creating if document doesn't exist, updating requires auth
+      allow create: if !exists(/databases/$(database)/documents/settings/$(settingsId));
+      allow update, delete: if isAuthenticated();
     }
     
     // Users collection
