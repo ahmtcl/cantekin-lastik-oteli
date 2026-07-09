@@ -1,7 +1,7 @@
 // XSS Protection: Sanitize string inputs
 export const sanitizeString = (str: string): string => {
   return str
-    .replace(/[<>"']/g, '') // Remove potential HTML/script tags
+    .replace(/[<>"]/g, '') // Remove potential HTML/script tags (keep apostrophe and hyphen for names)
     .trim()
     .slice(0, 500); // Limit length to prevent abuse
 };
@@ -25,8 +25,9 @@ export const validatePlate = (plate: string): boolean => {
 };
 
 export const validateName = (name: string): boolean => {
-  const sanitized = sanitizeString(name);
-  return sanitized.length >= 2 && sanitized.length <= 100 && /^[a-zA-ZğüşöçİĞÜŞÖÇ\s]+$/.test(sanitized);
+  const trimmed = name.trim();
+  // Allow letters (including Turkish), spaces, hyphens, and apostrophes
+  return trimmed.length >= 2 && trimmed.length <= 100 && /^[a-zA-ZğüşöçİĞÜŞÖÇıI\s\-']+$/.test(trimmed);
 };
 
 export const validateDate = (date: string): boolean => {
