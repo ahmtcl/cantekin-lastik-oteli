@@ -34,6 +34,12 @@ export default function GirisPage() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
+    
+    if (!auth) {
+      setError("Firebase yapılandırması yüklenemedi");
+      return;
+    }
+    
     setLoading(true);
 
     try {

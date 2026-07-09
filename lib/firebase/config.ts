@@ -1,4 +1,4 @@
-import { initializeApp, getApps } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
@@ -13,10 +13,27 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+// Initialize Firebase only on client-side with valid config
+function initializeFirebase() {
+  if (typeof window === "undefined") {
+    // Return null during SSR/build
+    return null;
+  }
+  
+  if (!firebaseConfig.apiKey) {
+    console.warn("Firebase config is missing. Check environment variables.");
+    return null;
+  }
 
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+  if (getApps().length === 0) {
+    return initializeApp(firebaseConfig);
+  }
+  return getApp();
+}
 
-// Analytics only on client-side
-export const analytics = typeof window !== "undefined" ? getAnalytics(app) : null;
+const app = initializeFirebase();
+
+// Export with safety checks
+export const auth = app ? getAuth(app) : null as any;
+export const db = app ? getFirestore(app) : null as any;
+export const analytics = app && typeof window !== "undefined" ? getAnalytics(app) : null;
