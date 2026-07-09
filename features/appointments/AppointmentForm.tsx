@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/Input";
 import { Textarea } from "@/components/Textarea";
@@ -98,43 +98,69 @@ export const AppointmentForm = () => {
   };
 
   const handleDateChange = async (date: string) => {
+    console.log("handleDateChange called with date:", date);
+    console.log("settings:", settings);
     setFormData({ ...formData, appointmentDate: date, appointmentTime: "" });
     setDateError("");
+    setAvailableTimes([]);
 
-    if (!date || !settings) return;
+    if (!date) return;
 
-    const selectedDate = new Date(date + "T00:00:00");
-
-    if (isPastDate(selectedDate)) {
-      setDateError("Geçmiş bir tarih seçemezsiniz");
-      setAvailableTimes([]);
+    if (!settings) {
+      console.log("Settings not loaded yet");
+      setDateError("Ayarlar yükleniyor...");
       return;
     }
 
-    const dayOfWeek = selectedDate.getDay();
-    if (!settings.workingDays.includes(dayOfWeek)) {
-      setDateError("Seçtiğiniz gün çalışma günü değil");
-      setAvailableTimes([]);
-      return;
+    try {
+      const selectedDate = new Date(date + "T00:00:00");
+      console.log("Selected date:", selectedDate);
+
+      if (isPastDate(selectedDate)) {
+        setDateError("Geçmiş bir tarih seçemezsiniz");
+        return;
+      }
+
+      const dayOfWeek = selectedDate.getDay();
+      console.log("Day of week:", dayOfWeek, "Working days:", settings.workingDays);
+      if (!settings.workingDays.includes(dayOfWeek)) {
+        setDateError("Seçtiğiniz gün çalışma günü değil");
+        return;
+      }
+
+      if (isDateClosed(selectedDate, settings.closedDays)) {
+        setDateError("Seçtiğiniz gün kapalı");
+        return;
+      }
+
+      console.log("Generating time slots...");
+      const allSlots = generateTimeSlots(
+        settings.workingHours.start,
+        settings.workingHours.end,
+        settings.appointmentInterval
+      );
+      console.log("All slots:", allSlots);
+
+      console.log("Fetching booked times...");
+      const bookedTimes = await getBookedTimes(date);
+      console.log("Booked times:", bookedTimes);
+      
+      const available = allSlots.filter((slot) => !bookedTimes.includes(slot));
+      console.log("Available times:", available);
+
+      setAvailableTimes(available);
+    } catch (error) {
+      console.error("Saat kontrolü hatası:", error);
+      setDateError("Müsait saatler yüklenirken bir hata oluştu");
     }
-
-    if (isDateClosed(selectedDate, settings.closedDays)) {
-      setDateError("Seçtiğiniz gün kapalı");
-      setAvailableTimes([]);
-      return;
-    }
-
-    const allSlots = generateTimeSlots(
-      settings.workingHours.start,
-      settings.workingHours.end,
-      settings.appointmentInterval
-    );
-
-    const bookedTimes = await getBookedTimes(date);
-    const available = allSlots.filter((slot) => !bookedTimes.includes(slot));
-
-    setAvailableTimes(available);
   };
+
+  // Settings yüklendiğinde tarih seçiliyse saatleri yükle
+  useEffect(() => {
+    if (settings && formData.appointmentDate && availableTimes.length === 0 && !dateError) {
+      handleDateChange(formData.appointmentDate);
+    }
+  }, [settings]);
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
