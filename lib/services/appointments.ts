@@ -2,6 +2,7 @@ import {
   collection,
   addDoc,
   updateDoc,
+  deleteDoc,
   doc,
   getDocs,
   query,
@@ -46,6 +47,15 @@ export const updateAppointmentStatus = async (
     status,
     updatedAt: Timestamp.now(),
   });
+};
+
+export const deleteAppointment = async (id: string): Promise<void> => {
+  if (!db) {
+    throw new Error("Firebase not initialized");
+  }
+
+  const docRef = doc(db, COLLECTION_NAME, id);
+  await deleteDoc(docRef);
 };
 
 export const getAppointmentsByDate = async (
