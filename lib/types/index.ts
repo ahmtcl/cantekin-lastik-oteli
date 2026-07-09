@@ -6,6 +6,9 @@ export interface Appointment {
   id: string;
   name: string;
   phone: string;
+  email: string;
+  brand: string;
+  model: string;
   plate: string;
   appointmentDate: string;
   appointmentTime: string;
@@ -18,6 +21,9 @@ export interface Appointment {
 export interface AppointmentFormData {
   name: string;
   phone: string;
+  email: string;
+  brand: string;
+  model: string;
   plate: string;
   appointmentDate: string;
   appointmentTime: string;

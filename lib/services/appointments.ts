@@ -43,17 +43,35 @@ export const updateAppointmentStatus = async (
 export const getAppointmentsByDate = async (
   date: string
 ): Promise<Appointment[]> => {
-  const q = query(
-    collection(db, COLLECTION_NAME),
-    where("appointmentDate", "==", date),
-    orderBy("appointmentTime", "asc")
-  );
+  try {
+    // Try with index-based query first
+    const q = query(
+      collection(db, COLLECTION_NAME),
+      where("appointmentDate", "==", date),
+      orderBy("appointmentTime", "asc")
+    );
 
-  const snapshot = await getDocs(q);
-  return snapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  })) as Appointment[];
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as Appointment[];
+  } catch (error: any) {
+    // Fallback: if index is building, fetch all and filter client-side
+    if (error?.code === 'failed-precondition' || error?.message?.includes('index')) {
+      console.log('Index building, using fallback query...');
+      const snapshot = await getDocs(collection(db, COLLECTION_NAME));
+      const allAppointments = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Appointment[];
+      
+      return allAppointments
+        .filter((apt) => apt.appointmentDate === date)
+        .sort((a, b) => a.appointmentTime.localeCompare(b.appointmentTime));
+    }
+    throw error;
+  }
 };
 
 export const getTodayAppointments = async (): Promise<Appointment[]> => {
@@ -62,17 +80,37 @@ export const getTodayAppointments = async (): Promise<Appointment[]> => {
 };
 
 export const getAllAppointments = async (): Promise<Appointment[]> => {
-  const q = query(
-    collection(db, COLLECTION_NAME),
-    orderBy("appointmentDate", "desc"),
-    orderBy("appointmentTime", "desc")
-  );
+  try {
+    // Try with index-based query first
+    const q = query(
+      collection(db, COLLECTION_NAME),
+      orderBy("appointmentDate", "desc"),
+      orderBy("appointmentTime", "desc")
+    );
 
-  const snapshot = await getDocs(q);
-  return snapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  })) as Appointment[];
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as Appointment[];
+  } catch (error: any) {
+    // Fallback: if index is building, fetch all and sort client-side
+    if (error?.code === 'failed-precondition' || error?.message?.includes('index')) {
+      console.log('Index building, using fallback query...');
+      const snapshot = await getDocs(collection(db, COLLECTION_NAME));
+      const allAppointments = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Appointment[];
+      
+      return allAppointments.sort((a, b) => {
+        const dateCompare = b.appointmentDate.localeCompare(a.appointmentDate);
+        if (dateCompare !== 0) return dateCompare;
+        return b.appointmentTime.localeCompare(a.appointmentTime);
+      });
+    }
+    throw error;
+  }
 };
 
 export const getAppointmentById = async (id: string): Promise<Appointment | null> => {

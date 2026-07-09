@@ -263,10 +263,13 @@ export const AppointmentForm = () => {
       await createAppointment({
         name: formData.name.trim(),
         phone: formatPhone(formData.phone),
+        email: formData.email.trim(),
+        brand: formData.brand.trim(),
+        model: formData.model.trim(),
         plate: formatPlate(formData.plate),
         appointmentDate: formData.appointmentDate,
         appointmentTime: formData.appointmentTime,
-        note: `${registrationType.toUpperCase()} | ${vehicleType.toUpperCase()} | ${formData.companyName ? `Firma: ${formData.companyName} | ` : ""}Email: ${formData.email} | Marka: ${formData.brand} | Model: ${formData.model} | ${serviceDetails.join(" | ")}${formData.note ? ` | Not: ${formData.note}` : ""}`,
+        note: `${registrationType.toUpperCase()} | ${vehicleType.toUpperCase()}${formData.companyName ? ` | Firma: ${formData.companyName}` : ""} | ${serviceDetails.join(" | ")}${formData.note ? ` | Not: ${formData.note}` : ""}`,
       });
 
       router.push("/tesekkur");
