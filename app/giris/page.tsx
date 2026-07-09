@@ -35,15 +35,20 @@ export default function GirisPage() {
     e.preventDefault();
     setError("");
     
+    console.log("Login attempt:", { email: formData.email, hasAuth: !!auth });
+    
     if (!auth) {
-      setError("Firebase yapılandırması yüklenemedi");
+      console.error("Firebase auth not initialized");
+      setError("Firebase yapılandırması yüklenemedi. Lütfen sayfayı yenileyin.");
       return;
     }
     
     setLoading(true);
 
     try {
-      await signInWithEmailAndPassword(auth, formData.email, formData.password);
+      console.log("Attempting Firebase sign in...");
+      const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
+      console.log("Sign in successful:", userCredential.user.uid);
       
       // Save or remove email based on remember me
       if (rememberMe) {
@@ -53,8 +58,26 @@ export default function GirisPage() {
       }
       
       router.push("/yonetim");
-    } catch {
-      setError("E-posta veya şifre hatalı");
+    } catch (error: any) {
+      console.error("Login error:", error.code, error.message);
+      
+      let errorMessage = "E-posta veya şifre hatalı";
+      
+      if (error.code === "auth/user-not-found") {
+        errorMessage = "Bu e-posta adresiyle kayıtlı kullanıcı bulunamadı";
+      } else if (error.code === "auth/wrong-password") {
+        errorMessage = "Hatalı şifre";
+      } else if (error.code === "auth/invalid-email") {
+        errorMessage = "Geçersiz e-posta adresi";
+      } else if (error.code === "auth/too-many-requests") {
+        errorMessage = "Çok fazla başarısız deneme. Lütfen daha sonra tekrar deneyin.";
+      } else if (error.code === "auth/network-request-failed") {
+        errorMessage = "İnternet bağlantısı hatası";
+      } else if (error.code === "auth/invalid-credential") {
+        errorMessage = "E-posta veya şifre hatalı. Firebase Console'da kullanıcı oluşturduğunuzdan emin olun.";
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
