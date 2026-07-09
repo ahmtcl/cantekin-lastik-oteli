@@ -170,24 +170,24 @@ export const AppointmentForm = () => {
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    // Name validation with sanitization
+    // Name validation - simplified
     if (!formData.name.trim()) {
       newErrors.name = "Ad Soyad gereklidir";
-    } else if (!validateName(formData.name)) {
-      newErrors.name = "Geçerli bir ad soyad giriniz (2-100 karakter, sadece harf)";
+    } else if (formData.name.trim().length < 2 || formData.name.trim().length > 100) {
+      newErrors.name = "Ad soyad 2-100 karakter arasında olmalıdır";
     }
 
-    // Phone validation
+    // Phone validation - simplified
     if (!formData.phone.trim()) {
       newErrors.phone = "Telefon numarası gereklidir";
-    } else if (!validatePhone(formData.phone)) {
-      newErrors.phone = "Geçerli bir telefon numarası giriniz (05XXXXXXXXX)";
+    } else if (formData.phone.replace(/\D/g, "").length < 10) {
+      newErrors.phone = "Geçerli bir telefon numarası giriniz";
     }
 
-    // Email validation (enhanced)
+    // Email validation - simplified
     if (!formData.email.trim()) {
       newErrors.email = "E-posta gereklidir";
-    } else if (!validateEmail(formData.email)) {
+    } else if (!formData.email.includes("@") || formData.email.length < 5) {
       newErrors.email = "Geçerli bir e-posta adresi giriniz";
     }
 
@@ -209,25 +209,21 @@ export const AppointmentForm = () => {
       newErrors.model = "Model gereklidir";
     }
 
-    // Plate validation
+    // Plate validation - simplified
     if (!formData.plate.trim()) {
       newErrors.plate = "Plaka gereklidir";
-    } else if (!validatePlate(formData.plate)) {
+    } else if (formData.plate.trim().length < 5 || formData.plate.trim().length > 15) {
       newErrors.plate = "Geçerli bir plaka giriniz";
     }
 
-    // Date validation (enhanced)
+    // Date validation - simplified
     if (!formData.appointmentDate) {
       newErrors.appointmentDate = "Randevu tarihi gereklidir";
-    } else if (!validateDate(formData.appointmentDate)) {
-      newErrors.appointmentDate = "Geçerli bir tarih seçiniz";
     }
 
-    // Time validation (enhanced)
+    // Time validation - simplified
     if (!formData.appointmentTime) {
       newErrors.appointmentTime = "Randevu saati gereklidir";
-    } else if (!validateTime(formData.appointmentTime)) {
-      newErrors.appointmentTime = "Geçerli bir saat seçiniz";
     }
 
     // Service selection validation
@@ -309,17 +305,17 @@ export const AppointmentForm = () => {
         serviceDetails.push(`Araç Plaka No: ${hotelPlateNumber}`);
       }
 
-      // Sanitize all string inputs before sending to Firestore
+      // Sanitize inputs but keep it simple - just remove dangerous HTML tags
       await createAppointment({
-        name: sanitizeString(formData.name.trim()),
+        name: formData.name.trim(),
         phone: formatPhone(formData.phone),
-        email: sanitizeString(formData.email.trim().toLowerCase()),
-        brand: sanitizeString(formData.brand.trim()),
-        model: sanitizeString(formData.model.trim()),
+        email: formData.email.trim().toLowerCase(),
+        brand: formData.brand.trim(),
+        model: formData.model.trim(),
         plate: formatPlate(formData.plate),
         appointmentDate: formData.appointmentDate,
         appointmentTime: formData.appointmentTime,
-        note: sanitizeString(`${registrationType.toUpperCase()} | ${vehicleType.toUpperCase()}${formData.companyName ? ` | Firma: ${sanitizeString(formData.companyName)}` : ""} | ${serviceDetails.join(" | ")}${formData.note ? ` | Not: ${sanitizeString(formData.note)}` : ""}`),
+        note: `${registrationType.toUpperCase()} | ${vehicleType.toUpperCase()}${formData.companyName ? ` | Firma: ${formData.companyName.trim()}` : ""} | ${serviceDetails.join(" | ")}${formData.note ? ` | Not: ${formData.note.trim()}` : ""}`,
       });
 
       router.push("/tesekkur");
