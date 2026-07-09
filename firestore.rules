@@ -8,13 +8,36 @@ service cloud.firestore {
       return request.auth != null;
     }
     
+    // Validate appointment data structure and content
+    function isValidAppointment(appointment) {
+      return appointment.keys().hasAll(['name', 'phone', 'email', 'plate', 'appointmentDate', 'appointmentTime', 'status'])
+        && appointment.name is string && appointment.name.size() > 0 && appointment.name.size() <= 100
+        && appointment.phone is string && appointment.phone.size() >= 10 && appointment.phone.size() <= 15
+        && appointment.email is string && appointment.email.size() > 0 && appointment.email.size() <= 100
+        && appointment.plate is string && appointment.plate.size() > 0 && appointment.plate.size() <= 20
+        && appointment.appointmentDate is string && appointment.appointmentDate.size() == 10
+        && appointment.appointmentTime is string && appointment.appointmentTime.size() >= 4 && appointment.appointmentTime.size() <= 5
+        && appointment.status in ['bekliyor', 'hazirlaniyor', 'hazir', 'tamamlandi']
+        && appointment.createdAt is timestamp
+        && appointment.updatedAt is timestamp;
+    }
+    
     // Appointments collection
     match /appointments/{appointmentId} {
-      // Allow anyone to create new appointments (for public booking)
-      allow create: if true;
+      // Allow anyone to create new appointments with validation
+      allow create: if isValidAppointment(request.resource.data)
+        && request.resource.data.status == 'bekliyor'
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
       
       // Only authenticated users can read, update, delete
-      allow read, update, delete: if isAuthenticated();
+      allow read, delete: if isAuthenticated();
+      
+      // Update: only status and updatedAt can be changed by authenticated users
+      allow update: if isAuthenticated()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt'])
+        && request.resource.data.status in ['bekliyor', 'hazirlaniyor', 'hazir', 'tamamlandi']
+        && request.resource.data.updatedAt == request.time;
     }
     
     // Settings collection

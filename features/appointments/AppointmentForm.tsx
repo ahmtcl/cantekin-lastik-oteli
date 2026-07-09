@@ -12,6 +12,11 @@ import { createAppointment, getBookedTimes } from "@/lib/services/appointments";
 import {
   validatePhone,
   validatePlate,
+  validateEmail,
+  validateName,
+  validateDate,
+  validateTime,
+  sanitizeString,
   formatPhone,
   formatPlate,
 } from "@/lib/utils/validators";
@@ -165,26 +170,37 @@ export const AppointmentForm = () => {
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
 
+    // Name validation with sanitization
     if (!formData.name.trim()) {
       newErrors.name = "Ad Soyad gereklidir";
+    } else if (!validateName(formData.name)) {
+      newErrors.name = "Geçerli bir ad soyad giriniz (2-100 karakter, sadece harf)";
     }
 
+    // Phone validation
     if (!formData.phone.trim()) {
       newErrors.phone = "Telefon numarası gereklidir";
     } else if (!validatePhone(formData.phone)) {
       newErrors.phone = "Geçerli bir telefon numarası giriniz (05XXXXXXXXX)";
     }
 
+    // Email validation (enhanced)
     if (!formData.email.trim()) {
       newErrors.email = "E-posta gereklidir";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+    } else if (!validateEmail(formData.email)) {
       newErrors.email = "Geçerli bir e-posta adresi giriniz";
     }
 
-    if (registrationType === "kurumsal" && !formData.companyName.trim()) {
-      newErrors.companyName = "Firma adı gereklidir";
+    // Company name validation with sanitization
+    if (registrationType === "kurumsal") {
+      if (!formData.companyName.trim()) {
+        newErrors.companyName = "Firma adı gereklidir";
+      } else if (formData.companyName.trim().length < 2 || formData.companyName.trim().length > 100) {
+        newErrors.companyName = "Firma adı 2-100 karakter arasında olmalıdır";
+      }
     }
 
+    // Brand and model validation
     if (!formData.brand.trim()) {
       newErrors.brand = "Marka gereklidir";
     }
@@ -193,18 +209,25 @@ export const AppointmentForm = () => {
       newErrors.model = "Model gereklidir";
     }
 
+    // Plate validation
     if (!formData.plate.trim()) {
       newErrors.plate = "Plaka gereklidir";
     } else if (!validatePlate(formData.plate)) {
       newErrors.plate = "Geçerli bir plaka giriniz";
     }
 
+    // Date validation (enhanced)
     if (!formData.appointmentDate) {
       newErrors.appointmentDate = "Randevu tarihi gereklidir";
+    } else if (!validateDate(formData.appointmentDate)) {
+      newErrors.appointmentDate = "Geçerli bir tarih seçiniz";
     }
 
+    // Time validation (enhanced)
     if (!formData.appointmentTime) {
       newErrors.appointmentTime = "Randevu saati gereklidir";
+    } else if (!validateTime(formData.appointmentTime)) {
+      newErrors.appointmentTime = "Geçerli bir saat seçiniz";
     }
 
     // Service selection validation
@@ -286,16 +309,17 @@ export const AppointmentForm = () => {
         serviceDetails.push(`Araç Plaka No: ${hotelPlateNumber}`);
       }
 
+      // Sanitize all string inputs before sending to Firestore
       await createAppointment({
-        name: formData.name.trim(),
+        name: sanitizeString(formData.name.trim()),
         phone: formatPhone(formData.phone),
-        email: formData.email.trim(),
-        brand: formData.brand.trim(),
-        model: formData.model.trim(),
+        email: sanitizeString(formData.email.trim().toLowerCase()),
+        brand: sanitizeString(formData.brand.trim()),
+        model: sanitizeString(formData.model.trim()),
         plate: formatPlate(formData.plate),
         appointmentDate: formData.appointmentDate,
         appointmentTime: formData.appointmentTime,
-        note: `${registrationType.toUpperCase()} | ${vehicleType.toUpperCase()}${formData.companyName ? ` | Firma: ${formData.companyName}` : ""} | ${serviceDetails.join(" | ")}${formData.note ? ` | Not: ${formData.note}` : ""}`,
+        note: sanitizeString(`${registrationType.toUpperCase()} | ${vehicleType.toUpperCase()}${formData.companyName ? ` | Firma: ${sanitizeString(formData.companyName)}` : ""} | ${serviceDetails.join(" | ")}${formData.note ? ` | Not: ${sanitizeString(formData.note)}` : ""}`),
       });
 
       router.push("/tesekkur");
