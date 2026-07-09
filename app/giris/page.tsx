@@ -84,7 +84,7 @@ export default function GirisPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center p-4">
       <Container>
         <div className="max-w-md mx-auto">
           {/* Back button */}
@@ -94,16 +94,16 @@ export default function GirisPage() {
           </Link>
           
           {/* Login card */}
-          <div className="bg-white rounded-2xl p-8 shadow-xl border border-gray-200">
+          <div className="bg-white rounded-2xl p-6 md:p-8 shadow-xl border border-gray-200">
             {/* Header */}
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                <span className="text-2xl">🔐</span>
+            <div className="text-center mb-6 md:mb-8">
+              <div className="w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <span className="text-xl md:text-2xl">🔐</span>
               </div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
                 Personel Girişi
               </h1>
-              <p className="text-gray-600">
+              <p className="text-sm md:text-base text-gray-600">
                 Yönetim paneline erişim için giriş yapın
               </p>
             </div>

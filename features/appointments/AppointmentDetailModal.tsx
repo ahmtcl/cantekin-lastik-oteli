@@ -90,22 +90,22 @@ export const AppointmentDetailModal = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
-      <div className="bg-white rounded-2xl max-w-5xl w-full shadow-2xl my-8">
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center p-2 md:p-4 z-50 overflow-y-auto">
+      <div className="bg-white rounded-2xl max-w-5xl w-full shadow-2xl my-4 md:my-8">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-4 md:p-6 border-b border-gray-200">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Randevu Detayı</h2>
-            <p className="text-sm text-gray-500 mt-1">
+            <h2 className="text-xl md:text-2xl font-bold text-gray-900">Randevu Detayı</h2>
+            <p className="text-xs md:text-sm text-gray-500 mt-1">
               Randevu bilgilerini görüntüleyin ve durumu güncelleyin
             </p>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-2 transition-colors"
+            className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-2 transition-colors flex-shrink-0"
           >
             <svg
-              className="w-6 h-6"
+              className="w-5 h-5 md:w-6 md:h-6"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -121,7 +121,7 @@ export const AppointmentDetailModal = ({
         </div>
 
         {/* Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 p-4 md:p-6">
           {/* Left Column - Appointment Info */}
           <div className="lg:col-span-2 space-y-6">
             {/* Date & Time Card */}

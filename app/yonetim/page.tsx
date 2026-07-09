@@ -52,10 +52,10 @@ export default function YonetimPage() {
   });
 
   return (
-    <div className="py-8">
+    <div className="py-6 md:py-8 px-4">
       <Container>
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
+        <div className="mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
           <p className="text-gray-600">Bugünün Randevuları - {today}</p>
         </div>
 
