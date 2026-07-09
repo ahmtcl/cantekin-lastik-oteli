@@ -8,6 +8,9 @@ import { AppointmentDetailModal } from "@/features/appointments/AppointmentDetai
 import { getTodayAppointments } from "@/lib/services/appointments";
 import { Appointment } from "@/lib/types";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export default function YonetimPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [selectedAppointment, setSelectedAppointment] =

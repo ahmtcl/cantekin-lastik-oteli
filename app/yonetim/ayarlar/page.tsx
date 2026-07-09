@@ -10,6 +10,9 @@ import { Settings } from "@/lib/types";
 
 const dayNames = ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"];
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export default function AyarlarPage() {
   const [settings, setSettings] = useState<Settings | null>(null);
   const [loading, setLoading] = useState(true);

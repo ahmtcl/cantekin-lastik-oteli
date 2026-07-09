@@ -9,6 +9,9 @@ import { AppointmentDetailModal } from "@/features/appointments/AppointmentDetai
 import { getAllAppointments } from "@/lib/services/appointments";
 import { Appointment } from "@/lib/types";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export default function RandevularPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [selectedAppointment, setSelectedAppointment] =

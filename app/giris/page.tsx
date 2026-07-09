@@ -9,6 +9,9 @@ import { Button } from "@/components/Button";
 import { Container } from "@/components/Container";
 import Link from "next/link";
 
+// Force dynamic rendering to avoid build-time Firebase initialization
+export const dynamic = 'force-dynamic';
+
 export default function GirisPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({
