@@ -10,15 +10,16 @@ service cloud.firestore {
     
     // Validate appointment data structure and content
     function isValidAppointment(appointment) {
-      return appointment.keys().hasAll(['name', 'phone', 'email', 'brand', 'model', 'plate', 'appointmentDate', 'appointmentTime', 'status'])
+      return appointment.keys().hasAll(['name', 'phone', 'email', 'brand', 'model', 'plate', 'appointmentDate', 'appointmentTime', 'status', 'note'])
         && appointment.name is string && appointment.name.size() > 0 && appointment.name.size() <= 100
-        && appointment.phone is string && appointment.phone.size() >= 10 && appointment.phone.size() <= 20
+        && appointment.phone is string && appointment.phone.size() >= 10 && appointment.phone.size() <= 25
         && appointment.email is string && appointment.email.size() > 0 && appointment.email.size() <= 100
         && appointment.brand is string && appointment.brand.size() > 0 && appointment.brand.size() <= 50
         && appointment.model is string && appointment.model.size() > 0 && appointment.model.size() <= 100
         && appointment.plate is string && appointment.plate.size() > 0 && appointment.plate.size() <= 20
         && appointment.appointmentDate is string && appointment.appointmentDate.size() == 10
         && appointment.appointmentTime is string && appointment.appointmentTime.size() >= 4 && appointment.appointmentTime.size() <= 5
+        && appointment.note is string && appointment.note.size() <= 1000
         && appointment.status in ['bekliyor', 'hazirlaniyor', 'hazir', 'tamamlandi']
         && appointment.createdAt is timestamp
         && appointment.updatedAt is timestamp;
