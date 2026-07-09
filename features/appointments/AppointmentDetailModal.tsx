@@ -27,28 +27,30 @@ export const AppointmentDetailModal = ({
   const [selectedStatus, setSelectedStatus] = useState(appointment.status);
   const [loading, setLoading] = useState(false);
 
-  // Parse brand and model from note if not available as separate fields (for backward compatibility)
-  const getBrandFromNote = () => {
-    if (appointment.brand) return appointment.brand;
-    const match = appointment.note?.match(/Marka:\s*([^|]+)/);
-    return match ? match[1].trim() : "-";
+  // Parse appointment data from note if fields are empty
+  const parseNoteData = () => {
+    if (appointment.brand && appointment.model && appointment.email) {
+      return {
+        email: appointment.email,
+        brand: appointment.brand,
+        model: appointment.model,
+      };
+    }
+
+    // Parse from note if needed
+    const note = appointment.note || "";
+    const emailMatch = note.match(/Email:\s*([^\s|]+)/);
+    const brandMatch = note.match(/Marka:\s*([^\s|]+)/);
+    const modelMatch = note.match(/Model:\s*([^\s|]+)/);
+
+    return {
+      email: emailMatch?.[1] || appointment.email || "-",
+      brand: brandMatch?.[1] || appointment.brand || "-",
+      model: modelMatch?.[1] || appointment.model || "-",
+    };
   };
 
-  const getModelFromNote = () => {
-    if (appointment.model) return appointment.model;
-    const match = appointment.note?.match(/Model:\s*([^|]+)/);
-    return match ? match[1].trim() : "-";
-  };
-
-  const getEmailFromNote = () => {
-    if (appointment.email) return appointment.email;
-    const match = appointment.note?.match(/Email:\s*([^|]+)/);
-    return match ? match[1].trim() : null;
-  };
-
-  const brand = getBrandFromNote();
-  const model = getModelFromNote();
-  const email = getEmailFromNote();
+  const { email, brand, model } = parseNoteData();
 
   const handleUpdateStatus = async () => {
     if (selectedStatus === appointment.status) return;
@@ -141,12 +143,10 @@ export const AppointmentDetailModal = ({
                   <p className="text-xs font-medium text-gray-500 mb-1">Telefon</p>
                   <p className="text-base font-medium text-gray-900">{appointment.phone}</p>
                 </div>
-                {email && (
-                  <div className="md:col-span-2">
-                    <p className="text-xs font-medium text-gray-500 mb-1">E-posta</p>
-                    <p className="text-base font-medium text-gray-900">{email}</p>
-                  </div>
-                )}
+                <div className="md:col-span-2">
+                  <p className="text-xs font-medium text-gray-500 mb-1">E-posta</p>
+                  <p className="text-base font-medium text-gray-900">{email}</p>
+                </div>
               </div>
             </div>
 

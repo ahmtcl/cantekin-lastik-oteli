@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase/config";
@@ -15,8 +15,18 @@ export default function GirisPage() {
     email: "",
     password: "",
   });
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Load saved email on mount
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("rememberedEmail");
+    if (savedEmail) {
+      setFormData(prev => ({ ...prev, email: savedEmail }));
+      setRememberMe(true);
+    }
+  }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -25,6 +35,14 @@ export default function GirisPage() {
 
     try {
       await signInWithEmailAndPassword(auth, formData.email, formData.password);
+      
+      // Save or remove email based on remember me
+      if (rememberMe) {
+        localStorage.setItem("rememberedEmail", formData.email);
+      } else {
+        localStorage.removeItem("rememberedEmail");
+      }
+      
       router.push("/yonetim");
     } catch {
       setError("E-posta veya şifre hatalı");
@@ -86,6 +104,23 @@ export default function GirisPage() {
                 placeholder="••••••••"
                 required
               />
+
+              {/* Remember Me Checkbox */}
+              <div className="flex items-center">
+                <input
+                  id="remember-me"
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer"
+                />
+                <label
+                  htmlFor="remember-me"
+                  className="ml-2 text-sm font-medium text-gray-700 cursor-pointer select-none"
+                >
+                  Beni Hatırla
+                </label>
+              </div>
 
               <Button type="submit" fullWidth loading={loading}>
                 Giriş Yap

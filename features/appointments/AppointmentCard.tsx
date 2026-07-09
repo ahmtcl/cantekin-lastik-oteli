@@ -12,10 +12,24 @@ export const AppointmentCard = ({
   appointment,
   onClick,
 }: AppointmentCardProps) => {
-  // Parse brand and model from note if not available (backward compatibility)
-  const brand = appointment.brand || appointment.note?.match(/Marka:\s*([^|]+)/)?.[1]?.trim() || "-";
-  const model = appointment.model || appointment.note?.match(/Model:\s*([^|]+)/)?.[1]?.trim() || "-";
-  
+  // Parse brand and model from note if not available
+  const getBrandModel = () => {
+    if (appointment.brand && appointment.model) {
+      return { brand: appointment.brand, model: appointment.model };
+    }
+    
+    const note = appointment.note || "";
+    const brandMatch = note.match(/Marka:\s*([^\s|]+)/);
+    const modelMatch = note.match(/Model:\s*([^\s|]+)/);
+    
+    return {
+      brand: brandMatch?.[1] || "",
+      model: modelMatch?.[1] || "",
+    };
+  };
+
+  const { brand, model } = getBrandModel();
+
   return (
     <div
       onClick={onClick}
@@ -57,8 +71,12 @@ export const AppointmentCard = ({
           </svg>
           <p className="text-sm">
             <span className="font-semibold text-gray-900">{appointment.plate}</span>
-            <span className="text-gray-400 mx-1.5">•</span>
-            <span className="text-gray-600">{brand} {model}</span>
+            {(brand || model) && (
+              <>
+                <span className="text-gray-400 mx-1.5">•</span>
+                <span className="text-gray-600">{brand} {model}</span>
+              </>
+            )}
           </p>
         </div>
       </div>
