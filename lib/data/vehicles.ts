@@ -260,7 +260,7 @@ export const vehicleModels: Record<string, string[]> = {
   ],
   
   "Omoda": [
-    "C5", "E5"
+    "C5", "E5", "7"
   ],
   
   "Opel": [
