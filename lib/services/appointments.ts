@@ -18,6 +18,10 @@ const COLLECTION_NAME = "appointments";
 export const createAppointment = async (
   data: AppointmentFormData
 ): Promise<string> => {
+  if (!db) {
+    throw new Error("Firebase not initialized. Please check your internet connection and try again.");
+  }
+
   const appointmentData = {
     ...data,
     status: "bekliyor" as AppointmentStatus,
@@ -33,6 +37,10 @@ export const updateAppointmentStatus = async (
   id: string,
   status: AppointmentStatus
 ): Promise<void> => {
+  if (!db) {
+    throw new Error("Firebase not initialized");
+  }
+
   const docRef = doc(db, COLLECTION_NAME, id);
   await updateDoc(docRef, {
     status,
@@ -43,6 +51,11 @@ export const updateAppointmentStatus = async (
 export const getAppointmentsByDate = async (
   date: string
 ): Promise<Appointment[]> => {
+  if (!db) {
+    console.warn("Firebase not initialized, returning empty appointments");
+    return [];
+  }
+
   try {
     // Try with index-based query first
     const q = query(
@@ -80,6 +93,11 @@ export const getTodayAppointments = async (): Promise<Appointment[]> => {
 };
 
 export const getAllAppointments = async (): Promise<Appointment[]> => {
+  if (!db) {
+    console.warn("Firebase not initialized, returning empty appointments");
+    return [];
+  }
+
   try {
     // Try with index-based query first
     const q = query(
@@ -114,6 +132,11 @@ export const getAllAppointments = async (): Promise<Appointment[]> => {
 };
 
 export const getAppointmentById = async (id: string): Promise<Appointment | null> => {
+  if (!db) {
+    console.warn("Firebase not initialized");
+    return null;
+  }
+
   const docRef = doc(db, COLLECTION_NAME, id);
   const docSnap = await getDoc(docRef);
 
@@ -128,6 +151,17 @@ export const getAppointmentById = async (id: string): Promise<Appointment | null
 };
 
 export const getBookedTimes = async (date: string): Promise<string[]> => {
-  const appointments = await getAppointmentsByDate(date);
-  return appointments.map((apt) => apt.appointmentTime);
+  // Return empty array if Firebase is not initialized
+  if (!db) {
+    console.warn("Firebase not initialized, returning empty booked times");
+    return [];
+  }
+
+  try {
+    const appointments = await getAppointmentsByDate(date);
+    return appointments.map((apt) => apt.appointmentTime);
+  } catch (error) {
+    console.error("Error fetching booked times:", error);
+    return [];
+  }
 };

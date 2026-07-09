@@ -2,6 +2,8 @@ import { Container } from "@/components/Container";
 import { AppointmentForm } from "@/features/appointments/AppointmentForm";
 import Link from "next/link";
 
+export const dynamic = 'force-dynamic';
+
 export default function RandevuPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-12">

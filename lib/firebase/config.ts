@@ -17,17 +17,30 @@ const firebaseConfig = {
 function initializeFirebase() {
   if (typeof window === "undefined") {
     // Return null during SSR/build
+    console.log("Firebase init skipped: SSR environment");
     return null;
   }
   
   if (!firebaseConfig.apiKey) {
-    console.warn("Firebase config is missing. Check environment variables.");
+    console.error("Firebase config is missing. Check environment variables:", {
+      hasApiKey: !!firebaseConfig.apiKey,
+      hasAuthDomain: !!firebaseConfig.authDomain,
+      hasProjectId: !!firebaseConfig.projectId,
+    });
     return null;
   }
 
+  console.log("Initializing Firebase...", {
+    projectId: firebaseConfig.projectId,
+    hasApiKey: !!firebaseConfig.apiKey,
+  });
+
   if (getApps().length === 0) {
-    return initializeApp(firebaseConfig);
+    const app = initializeApp(firebaseConfig);
+    console.log("Firebase initialized successfully");
+    return app;
   }
+  console.log("Using existing Firebase app");
   return getApp();
 }
 
