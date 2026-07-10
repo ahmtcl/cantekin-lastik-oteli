@@ -10,6 +10,7 @@ import {
   orderBy,
   Timestamp,
   getDoc,
+  serverTimestamp,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 import { Appointment, AppointmentFormData, AppointmentStatus } from "@/lib/types";
@@ -45,7 +46,7 @@ export const updateAppointmentStatus = async (
   const docRef = doc(db, COLLECTION_NAME, id);
   await updateDoc(docRef, {
     status,
-    updatedAt: Timestamp.now(),
+    updatedAt: serverTimestamp(),
   });
 };
 
