@@ -192,7 +192,7 @@ export const AppointmentForm = () => {
     }
 
     // Company name validation with sanitization
-    if (registrationType === "kurumsal") {
+    if (registrationType === "kurumsal" || registrationType === "rentacar") {
       if (!formData.companyName.trim()) {
         newErrors.companyName = "Firma adı gereklidir";
       } else if (formData.companyName.trim().length < 2 || formData.companyName.trim().length > 100) {
@@ -506,7 +506,7 @@ export const AppointmentForm = () => {
           />
         </div>
         
-        {registrationType === "kurumsal" && (
+        {(registrationType === "kurumsal" || registrationType === "rentacar") && (
           <div className="mt-4">
             <Input
               label="Firma Adı"
