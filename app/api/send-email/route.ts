@@ -271,7 +271,7 @@ export async function POST(request: Request) {
           </div>
           <div class="content">
             <p class="welcome-msg">Merhaba,</p>
-            <p>Lastik oteli ve değişim randevu talebiniz başarıyla sistemimize kaydedilmiştir. Randevu bilgileriniz aşağıda yer almaktadır:</p>
+            <p>Randevu talebiniz başarıyla sistemimize kaydedilmiştir. Randevu bilgileriniz aşağıda yer almaktadır:</p>
             
             <div class="time-box">
               <table>
