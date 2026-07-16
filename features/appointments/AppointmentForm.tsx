@@ -42,6 +42,7 @@ export const AppointmentForm = () => {
   const [kvkkAccepted, setKvkkAccepted] = useState(false);
   const [showKvkkModal, setShowKvkkModal] = useState(false);
   const [privacyAccepted, setPrivacyAccepted] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
   // Step 2 data
   const [formData, setFormData] = useState({
@@ -485,10 +486,20 @@ export const AppointmentForm = () => {
               type="checkbox"
               checked={privacyAccepted}
               onChange={(e) => setPrivacyAccepted(e.target.checked)}
-              className="w-5 h-5 mt-0.5 text-blue-600 rounded"
+              className="w-5 h-5 mt-0.5 text-blue-600 rounded cursor-pointer"
             />
-            <span className="text-gray-700 group-hover:text-gray-900">
-              <strong>Çerez Politikası</strong> Okudum
+            <span className="text-gray-700 text-sm">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShowPrivacyModal(true);
+                }}
+                className="text-blue-600 hover:underline font-semibold focus:outline-none cursor-pointer"
+              >
+                Çerez Politikasını
+              </button>{" "}
+              okudum ve kabul ediyorum.
             </span>
           </label>
           {errors.privacy && <p className="text-sm text-red-600">{errors.privacy}</p>}
@@ -604,6 +615,84 @@ export const AppointmentForm = () => {
                   onClick={() => {
                     setKvkkAccepted(true);
                     setShowKvkkModal(false);
+                  }}
+                  className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all cursor-pointer text-sm shadow-md hover:shadow-lg focus:ring-4 focus:ring-blue-100"
+                >
+                  Okudum, Kabul Ediyorum
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* Çerez Politikası Modal */}
+        {showPrivacyModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
+            <div 
+              className="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl border border-gray-100 overflow-hidden transform scale-100 transition-all duration-300"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                <h3 className="text-lg font-bold text-gray-950">
+                  Çerez Politikası
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setShowPrivacyModal(false)}
+                  className="text-gray-400 hover:text-gray-600 text-2xl font-bold cursor-pointer focus:outline-none"
+                >
+                  &times;
+                </button>
+              </div>
+              
+              {/* Scrollable Content */}
+              <div className="px-6 py-6 overflow-y-auto space-y-4 text-sm text-gray-700 leading-relaxed">
+                <h4 className="font-bold text-gray-900 text-base">Çerez Politikası</h4>
+                <p>
+                  Can Tekin Lastik olarak web sitemizi ziyaret ettiğinizde kullanıcı deneyimini geliştirmek amacıyla çerezlerden yararlanmaktayız.
+                </p>
+
+                <h5 className="font-bold text-gray-950 mt-4 text-sm uppercase tracking-wide">Çerez Nedir?</h5>
+                <p>Çerezler, ziyaret ettiğiniz internet siteleri tarafından tarayıcınıza kaydedilen küçük metin dosyalarıdır.</p>
+
+                <h5 className="font-bold text-gray-950 mt-4 text-sm uppercase tracking-wide">Hangi Çerezleri Kullanıyoruz?</h5>
+                <p>Web sitemizde aşağıdaki çerez türleri kullanılabilir:</p>
+                
+                <div className="space-y-3 pl-2">
+                  <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                    <strong className="text-gray-900 block text-xs uppercase tracking-wide mb-1">Zorunlu Çerezler</strong>
+                    <span className="text-gray-600 text-xs">Web sitesinin doğru şekilde çalışabilmesi için gerekli olan çerezlerdir.</span>
+                  </div>
+                  <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                    <strong className="text-gray-900 block text-xs uppercase tracking-wide mb-1">Performans ve Analitik Çerezleri</strong>
+                    <span className="text-gray-600 text-xs">Web sitesinin kullanım istatistiklerini analiz ederek hizmet kalitesini artırmamıza yardımcı olur.</span>
+                  </div>
+                  <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                    <strong className="text-gray-900 block text-xs uppercase tracking-wide mb-1">İşlevsel Çerezler</strong>
+                    <span className="text-gray-600 text-xs">Kullanıcı tercihlerini hatırlayarak daha iyi bir kullanım deneyimi sunar.</span>
+                  </div>
+                  <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                    <strong className="text-gray-900 block text-xs uppercase tracking-wide mb-1">Üçüncü Taraf Çerezleri</strong>
+                    <span className="text-gray-600 text-xs">Web sitemizde kullanılan Google Maps, Google Fonts, WhatsApp bağlantıları, Google reCAPTCHA gibi üçüncü taraf hizmet sağlayıcıları kendi çerezlerini kullanabilir.</span>
+                  </div>
+                </div>
+
+                <h5 className="font-bold text-gray-950 mt-4 text-sm uppercase tracking-wide">Çerezlerin Yönetimi</h5>
+                <p>
+                  Tarayıcı ayarlarınız üzerinden çerezleri dilediğiniz zaman silebilir veya engelleyebilirsiniz. Ancak bazı çerezlerin devre dışı bırakılması web sitesinin bazı bölümlerinin düzgün çalışmamasına neden olabilir.
+                </p>
+                <p className="text-xs text-gray-500 italic mt-4">
+                  Web sitemizi kullanmaya devam ederek bu Çerez Politikası'nı kabul etmiş sayılırsınız.
+                </p>
+              </div>
+
+              {/* Footer */}
+              <div className="px-6 py-4 border-t border-gray-200 flex justify-end bg-gray-50">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPrivacyAccepted(true);
+                    setShowPrivacyModal(false);
                   }}
                   className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all cursor-pointer text-sm shadow-md hover:shadow-lg focus:ring-4 focus:ring-blue-100"
                 >
