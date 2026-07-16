@@ -32,6 +32,19 @@ export const createAppointment = async (
   };
 
   const docRef = await addDoc(collection(db, COLLECTION_NAME), appointmentData);
+
+  // Write to public bookedSlots collection (contains no personal/sensitive data)
+  try {
+    await addDoc(collection(db, "bookedSlots"), {
+      appointmentId: docRef.id,
+      appointmentDate: data.appointmentDate,
+      appointmentTime: data.appointmentTime,
+      createdAt: Timestamp.now(),
+    });
+  } catch (error) {
+    console.error("Error writing to bookedSlots collection:", error);
+  }
+
   return docRef.id;
 };
 
@@ -57,6 +70,19 @@ export const deleteAppointment = async (id: string): Promise<void> => {
 
   const docRef = doc(db, COLLECTION_NAME, id);
   await deleteDoc(docRef);
+
+  // Clean up the corresponding public bookedSlots record
+  try {
+    const q = query(
+      collection(db, "bookedSlots"),
+      where("appointmentId", "==", id)
+    );
+    const snapshot = await getDocs(q);
+    const deletePromises = snapshot.docs.map((docVal) => deleteDoc(doc(db, "bookedSlots", docVal.id)));
+    await Promise.all(deletePromises);
+  } catch (error) {
+    console.error("Error deleting from bookedSlots collection:", error);
+  }
 };
 
 export const getAppointmentsByDate = async (
@@ -169,10 +195,15 @@ export const getBookedTimes = async (date: string): Promise<string[]> => {
   }
 
   try {
-    const appointments = await getAppointmentsByDate(date);
-    return appointments.map((apt) => apt.appointmentTime);
+    // Query public bookedSlots instead of private appointments
+    const q = query(
+      collection(db, "bookedSlots"),
+      where("appointmentDate", "==", date)
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map((docVal) => docVal.data().appointmentTime);
   } catch (error) {
-    console.error("Error fetching booked times:", error);
+    console.error("Error fetching booked times from bookedSlots:", error);
     return [];
   }
 };

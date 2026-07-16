@@ -35,6 +35,14 @@ service cloud.firestore {
         && request.resource.data.status in ['bekliyor', 'hazirlaniyor', 'hazir', 'tamamlandi']
         && request.resource.data.updatedAt == request.time;
     }
+
+    // Booked slots collection (allows public reads/writes to check slot availability)
+    match /bookedSlots/{slotId} {
+      allow read: if true;
+      allow create: if request.resource.data.appointmentDate is string 
+        && request.resource.data.appointmentTime is string;
+      allow update, delete: if isAuthenticated();
+    }
     
     // Settings collection
     match /settings/{settingsId} {
