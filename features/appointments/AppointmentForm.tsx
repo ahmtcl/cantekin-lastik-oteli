@@ -79,6 +79,8 @@ export const AppointmentForm = () => {
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [dateError, setDateError] = useState("");
+  const [securityQuestion, setSecurityQuestion] = useState({ num1: 0, num2: 0 });
+  const [securityAnswer, setSecurityAnswer] = useState("");
 
   const handleStep1Continue = () => {
     const newErrors: Record<string, string> = {};
@@ -166,6 +168,16 @@ export const AppointmentForm = () => {
       handleDateChange(formData.appointmentDate);
     }
   }, [settings]);
+
+  // Step 2'ye geçildiğinde yeni bir güvenlik sorusu oluştur
+  useEffect(() => {
+    if (step === 2) {
+      const num1 = Math.floor(Math.random() * 9) + 1; // 1-9
+      const num2 = Math.floor(Math.random() * 9) + 1; // 1-9
+      setSecurityQuestion({ num1, num2 });
+      setSecurityAnswer("");
+    }
+  }, [step]);
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -259,6 +271,14 @@ export const AppointmentForm = () => {
       newErrors.hotelPlateNumber = "Araç plaka numarası gereklidir";
     }
 
+    // Security question validation
+    const expectedAnswer = securityQuestion.num1 + securityQuestion.num2;
+    if (!securityAnswer) {
+      newErrors.securityAnswer = "Güvenlik sorusunu cevaplamanız gerekmektedir";
+    } else if (parseInt(securityAnswer) !== expectedAnswer) {
+      newErrors.securityAnswer = "Güvenlik sorusunun cevabı hatalı";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -306,6 +326,8 @@ export const AppointmentForm = () => {
       }
 
       // Sanitize inputs but keep it simple - just remove dangerous HTML tags
+      const appointmentNote = `${registrationType.toUpperCase()} | ${vehicleType.toUpperCase()}${formData.companyName ? ` | Firma: ${formData.companyName.trim()}` : ""} | ${serviceDetails.join(" | ")}${formData.note ? ` | Not: ${formData.note.trim()}` : ""}`;
+
       await createAppointment({
         name: formData.name.trim(),
         phone: formatPhone(formData.phone),
@@ -315,8 +337,31 @@ export const AppointmentForm = () => {
         plate: formatPlate(formData.plate),
         appointmentDate: formData.appointmentDate,
         appointmentTime: formData.appointmentTime,
-        note: `${registrationType.toUpperCase()} | ${vehicleType.toUpperCase()}${formData.companyName ? ` | Firma: ${formData.companyName.trim()}` : ""} | ${serviceDetails.join(" | ")}${formData.note ? ` | Not: ${formData.note.trim()}` : ""}`,
+        note: appointmentNote,
       });
+
+      // Send email notifications via backend API
+      try {
+        await fetch("/api/send-email", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: formData.name.trim(),
+            phone: formatPhone(formData.phone),
+            email: formData.email.trim().toLowerCase(),
+            brand: formData.brand.trim(),
+            model: formData.model.trim(),
+            plate: formatPlate(formData.plate),
+            appointmentDate: formData.appointmentDate,
+            appointmentTime: formData.appointmentTime,
+            note: appointmentNote,
+          }),
+        });
+      } catch (emailError) {
+        console.error("E-posta gönderilirken hata oluştu:", emailError);
+      }
 
       router.push("/tesekkur");
     } catch {
@@ -930,6 +975,30 @@ export const AppointmentForm = () => {
           placeholder="Varsa eklemek istediğiniz notlar..."
           rows={4}
         />
+      </div>
+
+      {/* Güvenlik Sorusu */}
+      <div className="bg-gray-50 p-5 rounded-xl border border-gray-200">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+          <div>
+            <label className="block text-sm font-semibold text-gray-900 mb-1">
+              Güvenlik Sorusu
+              <span className="text-red-500 ml-1">*</span>
+            </label>
+            <p className="text-sm text-gray-600">
+              Lütfen bot olmadığınızı doğrulamak için işlemi yanıtlayın: <strong className="text-blue-600 text-base">{securityQuestion.num1} + {securityQuestion.num2} = ?</strong>
+            </p>
+          </div>
+          <Input
+            label="Cevap"
+            type="number"
+            value={securityAnswer}
+            onChange={(e) => setSecurityAnswer(e.target.value)}
+            error={errors.securityAnswer}
+            placeholder="İşlem Sonucu"
+            required
+          />
+        </div>
       </div>
 
       {/* Submit Button */}
