@@ -98,6 +98,9 @@ export async function POST(request: Request) {
       host,
       port,
       secure,
+      pool: true, // Use SMTP connection pooling to send multiple emails quickly
+      maxConnections: 3,
+      maxMessages: 10,
       auth: {
         user,
         pass,
@@ -324,8 +327,14 @@ export async function POST(request: Request) {
       replyTo: email || undefined
     };
 
-    // Send customer email if an email address is provided
+    let adminMailSent = false;
     let customerMailSent = false;
+    let adminMailError = "";
+    let customerMailError = "";
+
+    const mailPromises = [];
+
+    // Send customer email if an email address is provided
     if (email && email.includes("@")) {
       const mailOptionsCustomer = {
         from: `"${fromName}" <${user}>`,
@@ -334,21 +343,45 @@ export async function POST(request: Request) {
         html: customerHtml,
       };
 
-      try {
-        await transporter.sendMail(mailOptionsCustomer);
-        customerMailSent = true;
-      } catch (err) {
-        console.error("Failed to send customer confirmation email:", err);
-      }
+      mailPromises.push(
+        transporter.sendMail(mailOptionsCustomer)
+          .then(() => {
+            customerMailSent = true;
+          })
+          .catch((err: any) => {
+            console.error("Failed to send customer confirmation email:", err);
+            customerMailError = err?.message || String(err);
+          })
+      );
     }
 
     // Send admin email
-    await transporter.sendMail(mailOptionsAdmin);
+    mailPromises.push(
+      transporter.sendMail(mailOptionsAdmin)
+        .then(() => {
+          adminMailSent = true;
+        })
+        .catch((err: any) => {
+          console.error("Failed to send admin email:", err);
+          adminMailError = err?.message || String(err);
+        })
+    );
+
+    // Wait for all email operations to complete
+    await Promise.all(mailPromises);
+
+    // Close the transporter connection pool
+    transporter.close();
+
+    console.log("Email status details:", { adminMailSent, customerMailSent, adminMailError, customerMailError });
 
     return Response.json({
-      success: true,
-      message: "Emails sent successfully",
-      customerMailSent
+      success: adminMailSent || customerMailSent,
+      message: "Email sending process completed",
+      adminMailSent,
+      customerMailSent,
+      adminMailError,
+      customerMailError
     });
 
   } catch (error: any) {

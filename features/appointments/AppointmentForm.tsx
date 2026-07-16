@@ -342,7 +342,7 @@ export const AppointmentForm = () => {
 
       // Send email notifications via backend API
       try {
-        await fetch("/api/send-email", {
+        const emailResponse = await fetch("/api/send-email", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -359,6 +359,8 @@ export const AppointmentForm = () => {
             note: appointmentNote,
           }),
         });
+        const emailResult = await emailResponse.json();
+        console.log("Email result details:", emailResult);
       } catch (emailError) {
         console.error("E-posta gönderilirken hata oluştu:", emailError);
       }
