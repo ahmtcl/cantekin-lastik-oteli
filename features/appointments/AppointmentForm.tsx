@@ -40,6 +40,7 @@ export const AppointmentForm = () => {
   const [registrationType, setRegistrationType] = useState<RegistrationType>("");
   const [vehicleType, setVehicleType] = useState<VehicleType>("");
   const [kvkkAccepted, setKvkkAccepted] = useState(false);
+  const [showKvkkModal, setShowKvkkModal] = useState(false);
   const [privacyAccepted, setPrivacyAccepted] = useState(false);
 
   // Step 2 data
@@ -461,10 +462,20 @@ export const AppointmentForm = () => {
               type="checkbox"
               checked={kvkkAccepted}
               onChange={(e) => setKvkkAccepted(e.target.checked)}
-              className="w-5 h-5 mt-0.5 text-blue-600 rounded"
+              className="w-5 h-5 mt-0.5 text-blue-600 rounded cursor-pointer"
             />
-            <span className="text-gray-700 group-hover:text-gray-900">
-              <strong>KVKK Metnini</strong> Okudum
+            <span className="text-gray-700 text-sm">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShowKvkkModal(true);
+                }}
+                className="text-blue-600 hover:underline font-semibold focus:outline-none cursor-pointer"
+              >
+                KVKK Aydınlatma Metnini
+              </button>{" "}
+              okudum ve kabul ediyorum.
             </span>
           </label>
           {errors.kvkk && <p className="text-sm text-red-600">{errors.kvkk}</p>}
@@ -486,18 +497,122 @@ export const AppointmentForm = () => {
         {/* Continue Button */}
         <div className="flex gap-4 pt-6">
           <button
+            type="button"
             onClick={() => router.push("/")}
-            className="px-8 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-xl transition-all"
+            className="px-8 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-xl transition-all cursor-pointer"
           >
             Geri
           </button>
           <button
+            type="button"
             onClick={handleStep1Continue}
-            className="flex-1 px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg transition-all duration-300 hover:scale-[1.02]"
+            className="flex-1 px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg transition-all duration-300 hover:scale-[1.02] cursor-pointer"
           >
             Devam
           </button>
         </div>
+
+        {/* KVKK Modal */}
+        {showKvkkModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
+            <div 
+              className="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl border border-gray-100 overflow-hidden transform scale-100 transition-all duration-300"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                <h3 className="text-lg font-bold text-gray-950">
+                  KVKK Aydınlatma Metni
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setShowKvkkModal(false)}
+                  className="text-gray-400 hover:text-gray-600 text-2xl font-bold cursor-pointer focus:outline-none"
+                >
+                  &times;
+                </button>
+              </div>
+              
+              {/* Scrollable Content */}
+              <div className="px-6 py-6 overflow-y-auto space-y-4 text-sm text-gray-700 leading-relaxed">
+                <h4 className="font-bold text-gray-900 text-base">Kişisel Verilerin Korunması Hakkında Aydınlatma Metni</h4>
+                <p>
+                  6698 sayılı Kişisel Verilerin Korunması Kanunu ("KVKK") uyarınca, veri sorumlusu sıfatıyla Can Tekin Lastik olarak kişisel verilerinizin güvenliğine önem vermekteyiz.
+                </p>
+
+                <h5 className="font-bold text-gray-950 mt-4 text-sm uppercase tracking-wide">1. Toplanan Kişisel Veriler</h5>
+                <p>Web sitemiz üzerinden oluşturduğunuz randevu talepleri kapsamında aşağıdaki bilgiler işlenebilmektedir:</p>
+                <ul className="list-disc pl-5 space-y-1 text-gray-600">
+                  <li>Ad Soyad</li>
+                  <li>Telefon Numarası</li>
+                  <li>E-posta Adresi (varsa)</li>
+                  <li>Araç Bilgileri</li>
+                  <li>Plaka Bilgisi</li>
+                  <li>Randevu Tarihi ve Saati</li>
+                  <li>Tarafınızca iletilen diğer bilgiler</li>
+                </ul>
+
+                <h5 className="font-bold text-gray-950 mt-4 text-sm uppercase tracking-wide">2. Kişisel Verilerin İşlenme Amaçları</h5>
+                <p>Toplanan kişisel verileriniz;</p>
+                <ul className="list-disc pl-5 space-y-1 text-gray-600">
+                  <li>Lastik değişim ve servis randevularının oluşturulması,</li>
+                  <li>Müşteri taleplerinin değerlendirilmesi,</li>
+                  <li>Hizmet süreçlerinin planlanması ve yürütülmesi,</li>
+                  <li>İletişim faaliyetlerinin gerçekleştirilmesi,</li>
+                  <li>Yasal yükümlülüklerin yerine getirilmesi,</li>
+                  <li>Hizmet kalitesinin artırılması</li>
+                </ul>
+                <p>amaçlarıyla işlenmektedir.</p>
+
+                <h5 className="font-bold text-gray-950 mt-4 text-sm uppercase tracking-wide">3. Kişisel Verilerin Aktarılması</h5>
+                <p>Kişisel verileriniz;</p>
+                <ul className="list-disc pl-5 space-y-1 text-gray-600">
+                  <li>Kanunen yetkili kamu kurum ve kuruluşlarına,</li>
+                  <li>Yasal yükümlülükler kapsamında ilgili mercilere,</li>
+                  <li>Hizmetin yürütülmesi amacıyla teknik altyapı sağlayıcılarına,</li>
+                </ul>
+                <p>KVKK'nın 8. ve 9. maddelerinde belirtilen şartlar çerçevesinde aktarılabilir.</p>
+
+                <h5 className="font-bold text-gray-950 mt-4 text-sm uppercase tracking-wide">4. Kişisel Verilerin Toplanma Yöntemi ve Hukuki Sebebi</h5>
+                <p>Kişisel verileriniz;</p>
+                <ul className="list-disc pl-5 space-y-1 text-gray-600">
+                  <li>Web sitesi üzerindeki iletişim ve randevu formları,</li>
+                  <li>Telefon görüşmeleri,</li>
+                  <li>Elektronik iletişim kanalları</li>
+                </ul>
+                <p>aracılığıyla elektronik ortamda toplanmaktadır.</p>
+                <p>Bu veriler, KVKK'nın 5. maddesinde belirtilen hukuki sebepler kapsamında işlenmektedir.</p>
+
+                <h5 className="font-bold text-gray-950 mt-4 text-sm uppercase tracking-wide">5. KVKK Kapsamındaki Haklarınız</h5>
+                <p>KVKK'nın 11. maddesi kapsamında;</p>
+                <ul className="list-disc pl-5 space-y-1 text-gray-600">
+                  <li>Kişisel verilerinizin işlenip işlenmediğini öğrenme,</li>
+                  <li>İşlenmişse bilgi talep etme,</li>
+                  <li>Amacına uygun kullanılıp kullanılmadığını öğrenme,</li>
+                  <li>Eksik veya yanlış işlenmiş verilerin düzeltilmesini isteme,</li>
+                  <li>Verilerin silinmesini veya yok edilmesini talep etme,</li>
+                  <li>Kanuna aykırı işlenmesi nedeniyle zarara uğramanız hâlinde tazminat talep etme</li>
+                </ul>
+                <p>haklarına sahipsiniz.</p>
+                <p>Haklarınıza ilişkin taleplerinizi iletişim bilgilerimiz üzerinden tarafımıza iletebilirsiniz.</p>
+              </div>
+
+              {/* Footer */}
+              <div className="px-6 py-4 border-t border-gray-200 flex justify-end bg-gray-50">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setKvkkAccepted(true);
+                    setShowKvkkModal(false);
+                  }}
+                  className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all cursor-pointer text-sm shadow-md hover:shadow-lg focus:ring-4 focus:ring-blue-100"
+                >
+                  Okudum, Kabul Ediyorum
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
