@@ -3,7 +3,7 @@ import { Container } from "@/components/Container";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 relative">
       <div className="flex items-center justify-center min-h-screen px-4">
         <Container>
           <div className="max-w-4xl mx-auto text-center py-12 md:py-16">
@@ -34,14 +34,19 @@ export default function Home() {
                   Randevu Oluştur
                 </button>
               </Link>
-              <Link href="/giris">
-                <button className="w-full sm:w-auto px-6 md:px-8 py-3 md:py-4 bg-white hover:bg-gray-50 text-gray-700 font-semibold rounded-xl border-2 border-gray-200 transition-all duration-300 hover:scale-105 hover:border-gray-300">
-                  Personel Girişi
-                </button>
-              </Link>
             </div>
           </div>
         </Container>
+      </div>
+      
+      {/* Personel Girişi Link */}
+      <div className="absolute bottom-4 right-4 md:bottom-8 md:right-8">
+        <Link 
+          href="/giris"
+          className="text-xs md:text-sm text-gray-500 hover:text-blue-600 transition-colors underline font-medium"
+        >
+          Personel Girişi
+        </Link>
       </div>
     </div>
   );
