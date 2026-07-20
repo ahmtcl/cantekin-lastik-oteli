@@ -29,7 +29,7 @@ export default function TesekkurPage() {
             Randevunuz Başarıyla Oluşturuldu!
           </h1>
           <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-            Randevu talebiniz alınmıştır. Belirttiğiniz tarih ve saatte sizleri bekliyoruz.
+            Belirttiğiniz tarih ve saatte sizleri bekliyoruz.
             <br />
             <span className="text-gray-500">İyi yolculuklar dileriz!</span>
           </p>
